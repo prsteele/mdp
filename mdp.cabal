@@ -36,6 +36,12 @@ executable ex-3-2
   build-depends:       base ==4.6.*, array, containers, parallel
   hs-source-dirs:      src
 
+test-suite MDP
+  hs-source-dirs:     testsuite/tests/MDP, src/
+  main-is:            MDPTest.hs
+  type:               exitcode-stdio-1.0
+  build-depends:      base ==4.6.*, array, containers, parallel, QuickCheck >=2.8.1
+
 source-repository head
   type:     git
   location: https://github.com/prsteele/mdp.git

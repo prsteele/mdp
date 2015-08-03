@@ -1,6 +1,7 @@
 -- | A continuous-time Markov decision chain is a Markov decision
--- process where an exponential amount of time is spent at each state.
-module Algorithms.MDP.CTMDC where
+-- process (CTMDP) where an exponential amount of time is spent at
+-- each state.
+module Algorithms.MDP.CTMDP where
 
 import Algorithms.MDP.MDP hiding (MDP)
 import qualified Algorithms.MDP.MDP as MDP (MDP)
@@ -22,8 +23,8 @@ import qualified Algorithms.MDP.MDP as MDP (MDP)
 -- @b@ are actions or controls.
 --
 -- The 'Neighbors' function is used to speed up computations, and can
--- be computed automatically using the 'mkCTMDC' function.
-data CTMDC a b = CTMDC
+-- be computed automatically using the 'mkCTMDP' function.
+data CTMDP a b = CTMDP
                  { _states         :: [a]
                  , _actions        :: [b]
                  , _transitions    :: Transition a b
@@ -40,10 +41,10 @@ data CTMDC a b = CTMDC
 -- parameter of an exponential random variable.
 type TransitionRate a b = b -> a -> Double
 
--- | Constructs a new CTMDC.
+-- | Constructs a new CTMDP.
 --
 -- The 'Neighbor' function is computed automatically.
-mkCTMDC :: (Ord a, Ord b) =>
+mkCTMDP :: (Ord a, Ord b) =>
   [a]                     -- ^ The state space
   -> [b]                  -- ^ The action space
   -> (Transition a b)     -- ^ The transition probabilities
@@ -52,12 +53,12 @@ mkCTMDC :: (Ord a, Ord b) =>
   -> (ActionSet a b)      -- ^ The actions available at each state
   -> (TransitionRate a b) -- ^ The rates at which transitions occur
   -> Double               -- ^ The discount factor
-  -> CTMDC a b            -- ^ The resulting CTMDC
-mkCTMDC states actions trans rateCost fixedCost actionSet transRate discount =
+  -> CTMDP a b            -- ^ The resulting CTMDP
+mkCTMDP states actions trans rateCost fixedCost actionSet transRate discount =
   let
     neighbors = mkNeighbors states trans actionSet
 
-    in CTMDC { _states         = states
+    in CTMDP { _states         = states
              , _actions        = actions
              , _transitions    = trans
              , _rateCosts      = rateCost
@@ -68,14 +69,14 @@ mkCTMDC states actions trans rateCost fixedCost actionSet transRate discount =
              , _discount       = discount
              }
 
--- | Convert a CTMDC to a MDP via uniformization.
+-- | Convert a CTMDP to a MDP via uniformization.
 --
--- We convert the CTMDC to an equivalent MDP by introducing artifical
+-- We convert the CTMDP to an equivalent MDP by introducing artifical
 -- self-transitions to allow slow transitions to occur at the the
 -- fastest transition rate.
 --
 -- See Bertsekas p. 249.
-uniformize :: (Ord a, Eq a, Ord b, Eq b) => CTMDC a b -> MDP.MDP a b
+uniformize :: (Ord a, Eq a, Ord b, Eq b) => CTMDP a b -> MDP.MDP a b
 uniformize ctmdc = let
   states     = _states ctmdc
   actions    = _actions ctmdc

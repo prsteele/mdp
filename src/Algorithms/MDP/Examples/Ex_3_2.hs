@@ -1,4 +1,4 @@
-module Examples.Problems.Ex_3_2 (
+module Algorithms.MDP.Examples.Ex_3_2 (
   States (..)
   , Controls (..)
   , transition
@@ -9,9 +9,9 @@ module Examples.Problems.Ex_3_2 (
   , mdp
   ) where
 
-import Examples.Problems.Ex_3_1 hiding (alpha, mdp)
+import Algorithms.MDP.Examples.Ex_3_1 hiding (alpha, mdp)
 
-import MDP.MDP
+import Algorithms.MDP.MDP
 
 alpha = 1.0
 

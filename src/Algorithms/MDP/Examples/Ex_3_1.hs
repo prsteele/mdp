@@ -1,9 +1,9 @@
 -- | The example from Bertsekas, p. 22.
-module Examples.Problems.Ex_3_1 where
+module Algorithms.MDP.Examples.Ex_3_1 where
 
 import Data.Array
 
-import MDP.MDP
+import Algorithms.MDP.MDP
 
 data States = A | B
             deriving (Show, Ord, Eq)

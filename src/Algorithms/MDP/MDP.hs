@@ -8,7 +8,7 @@
 --
 -- We are primarily concerned with infinite horizon MDPs, both
 -- discounted and undiscounted.
-module MDP.MDP where
+module Algorithms.MDP.MDP where
 
 import qualified Data.Map as Map
 

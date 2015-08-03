@@ -1,7 +1,7 @@
-import Examples.Problems.Ex_3_2
+import Algorithms.MDP.Examples.Ex_3_2
 
-import MDP.MDP
-import MDP.ValueIteration
+import Algorithms.MDP.MDP
+import Algorithms.MDP.ValueIteration
 
 iterations = relativeValueIteration mdp distinguished 0.25
 pairs = zip iterations (tail iterations)

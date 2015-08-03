@@ -1,10 +1,10 @@
 -- | This module defines functions to solve an MDP via value iteration.
-module MDP.ValueIteration where
+module Algorithms.MDP.ValueIteration where
 
 import qualified Data.Map as Map
 import Data.List (minimumBy)
 
-import MDP.MDP
+import Algorithms.MDP.MDP
 
 -- | Given an MDP and a CostFunction, compute an improved estimate of
 -- the cost function.

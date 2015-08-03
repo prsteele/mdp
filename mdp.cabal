@@ -14,15 +14,22 @@ category:            Math
 build-type:          Simple
 cabal-version:       >=1.8
 
+
+
 Library
   Build-Depends:       base ==4.6.*, array, containers, parallel
-  Exposed-modules:     MDP.MDP, MDP.ValueIteration, MDP.CTMDC
+  Exposed-modules:     Algorithms.MDP.MDP, Algorithms.MDP.ValueIteration, Algorithms.MDP.CTMDC
   ghc-options:         -Wall -fforce-recomp
+  hs-source-dirs:      src
 
 executable ex-3-1
-  main-is:             Examples/run-ex-3-1.hs
+  main-is:             run-ex-3-1.hs
   build-depends:       base ==4.6.*, array, containers, parallel
+  hs-source-dirs:      src
+
+
 
 executable ex-3-2
-  main-is:             Examples/run-ex-3-2.hs
+  main-is:             run-ex-3-2.hs
   build-depends:       base ==4.6.*, array, containers, parallel
+  hs-source-dirs:      src

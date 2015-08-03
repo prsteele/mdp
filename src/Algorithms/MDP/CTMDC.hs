@@ -2,12 +2,12 @@
 
 -- | A continuous-time Markov decision chain is a Markov decision
 -- process where an exponential amount of time is spent at each state.
-module MDP.CTMDC where
+module Algorithms.MDP.CTMDC where
 
 import Debug.Trace
 
-import MDP.MDP hiding (MDP)
-import qualified MDP.MDP as MDP (MDP)
+import Algorithms.MDP.MDP hiding (MDP)
+import qualified Algorithms.MDP.MDP as MDP (MDP)
 
 
 -- | A continuous-time Markov decision chain with states of type @a@

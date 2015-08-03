@@ -1,7 +1,6 @@
-import Examples.Problems.Ex_3_1
-
-import MDP.MDP
-import MDP.ValueIteration
+import Algorithms.MDP.Examples.Ex_3_1
+import Algorithms.MDP.MDP
+import Algorithms.MDP.ValueIteration
 
 converging :: Double
               -> (CostFunction States Controls, CostFunction States Controls)

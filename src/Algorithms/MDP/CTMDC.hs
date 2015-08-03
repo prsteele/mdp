@@ -1,10 +1,6 @@
-{-# LANGUAGE TupleSections #-}
-
 -- | A continuous-time Markov decision chain is a Markov decision
 -- process where an exponential amount of time is spent at each state.
 module Algorithms.MDP.CTMDC where
-
-import Debug.Trace
 
 import Algorithms.MDP.MDP hiding (MDP)
 import qualified Algorithms.MDP.MDP as MDP (MDP)
@@ -108,4 +104,4 @@ uniformize ctmdc = let
 
   discount' = (1 / tau) / (1 / tau + discount)
 
-  in trace (show c) $ mkMDP states actions trans' costs' actionSet discount'
+  in mkMDP states actions trans' costs' actionSet discount'

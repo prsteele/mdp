@@ -1,4 +1,6 @@
-import Algorithms.MDP.MDP
+{-# Language FlexibleInstances #-}
+
+import Algorithms.MDP.MDP as Q
 
 import Control.Monad
 import qualified Data.Map as Map
@@ -36,77 +38,59 @@ arbitraryPDF xs = do
   probs <- (vector (length xs)) `suchThat` (all (>= 0)) :: Gen [Double]
   return [p / (sum probs) | p <- probs]
 
-test :: (Num a, Show a) => [a] -> IO ()
-test = putStrLn . show . sum
+arbitraryTransitionMatrix :: (Ord a, Ord b) =>
+                             [a] -> (a -> [b]) -> Gen (a -> a -> b -> Double)
+arbitraryTransitionMatrix states actionSet = let
+  pairs = [(s, a) | s <- states, a <- actionSet s]
+  count = length pairs
+  pdfToMap pdf = Map.fromList (zip states pdf)
+  masterMap pdfs = Map.fromList (zip pairs (map pdfToMap pdfs))
+  in do
+    pdfs <- replicateM count (arbitraryPDF states)
+    return $ (\s t a -> ((masterMap pdfs) Map.! (s, a)) Map.! t)
 
--- instance Arbitrary (MPD Int Int) where
---   arbitrary = do
---     states <- arbitraryIntegerSequence 1 20
---     actions <- arbitraryIntegerSequence 1 10
---     actionSet <- arbitraryActionSet states actions
---     return $ mkMDP states actions trans cost a
-    
-    
+arbitraryCostFunction :: (Ord a, Ord b) =>
+                         [a] -> (a -> [b]) -> Gen (a -> b -> Double)
+arbitraryCostFunction states actionSet = let
+  pairs = [(s, a) | s <- states, a <- actionSet s]
+  in do
+    costs <- vector (length pairs) `suchThat` (all (>= 0))
+    return $ curry ((Map.fromList (zip pairs costs)) Map.!)
 
--- actionSet :: Int -> Int -> Gen (Int -> [Int])
--- actionSet nStates nActions = let
---   states  = [1..nStates]
---   actions = [1..nActions]
+arbitraryDiscount :: Gen Double
+arbitraryDiscount =
+  sized $ \n -> let
+    n' = max 2 n
+    in do
+      val <- choose (1, n')
+      return $ (fromIntegral val) / (fromIntegral n')
 
---   narrow 
+instance Arbitrary (Q.MDP Int Int) where
+  arbitrary = do
+    states    <- arbitraryIntegerSequence 1 20
+    actions   <- arbitraryIntegerSequence 1 10
+    actionSet <- arbitraryActionSet states actions
+    costFn    <- arbitraryCostFunction actions actionSet
+    transMat  <- arbitraryTransitionMatrix actions actionSet
+    discount  <- arbitrary
+    return $ mkMDP states actions transMat costFn actionSet discount
 
--- instance Arbitrary (MDP Int Int) where
---   arbitrary = let
---     narrow actions flips | any flips = map fst $ filter snd $ zip actions flips
---                          | otherwise = actions
+prop_idempotent :: Int -> Bool
+prop_idempotent x = id x == id x
 
---     actionSet nStates nActions flips = let
---       states  = [1..nStates]
---       actions = [1..nActions]
---       allowed = map (narrow actions) flips
---       in Map.fromList (zip states allowed)
+increasing :: (Ord a) => [a] -> 
 
---     in do
---       nStates <- choose (1, 20)
---       nActions <- choose (1, 10)
---       flips <- replicateM nStates (vector nActions :: Gen [Bool])
-      
-          
+prop_increasing :: (Q.MDP a b) -> Bool
+prop_increasing mdp = let
+  iterations = valueIteration mdp
 
-
--- instance Arbitrary ActionSet' where
---   arbitrary = do
---     nStates <- choose (1, 20)
---     states <- vector nStates :: Gen [Int]
---     nActions <- choose (1, 10)
---     actions <- vector nActions :: Gen [Int]
---     allowed <- replicateM nStates (vector nActions :: Gen [Bool]
---     return (ActionSet' (StateSpace (nStates - 1)) (ActionSpace (nActions - 1)) (\_ -> actions))
-    
-
--- data ValidTrans = ValidTrans (Transition Int Bool)
-
--- instance Arbitrary ValidTrans where
---    arbitrary = let
---      pairs = [(a, s) | s <- states, a <- actions]
---      size = length states * length actions
-
---      transMap :: [Double] -> Map.Map (Bool, Int) Double
---      transMap ps = Map.fromList (zip pairs ps)
-
---      trans :: [Double] -> ValidTrans
---      trans ps = ValidTrans (curry ((transMap ps) Map.!))
-     
---      in do
---        ps <- fmap (take size) arbitrary
---        return (trans ps)
-
--- prop_idempotent :: Int -> Bool
--- prop_idempotent x = id x == id x
+  increasingFor s = take 10 (map snd (map ($ s) iterations))
+  
+  values = map 
 
 -- -- prop_isStochastic :: ValidTrans -> Bool
 -- -- prop_isStochastic (ValidTrans trans) = let
 -- --   mdp = mkMDP states actions trans (\a b -> 0) (\a -> actions) 1.0
 -- --   in isStochastic mdp 0
 
--- main = quickCheck prop_idempotent
+main = quickCheck prop_idempotent

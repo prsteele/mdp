@@ -91,5 +91,11 @@ instance Arbitrary (MDP.MDP Int Int) where
     discount  <- arbitraryDiscount
     return $ mkMDP states actions transMat costFn actionSet discount
 
-  --shrink mdp = let
+  shrink mdp = let
+    states  = MDP.unStates mdp
+    actions = MDP.unActions mdp
+    in do
+      states'  <- shrink states
+      actions' <- shrink actions
+      return $ mdp { unStates = states', unActions = actions' }
     

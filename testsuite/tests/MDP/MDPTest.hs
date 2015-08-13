@@ -29,8 +29,12 @@ prop_zeroCostFunction mdp = let
   zero = mkZeroCostFunction mdp
   in and [snd (zero s) == 0 | s <- MDP.unStates mdp]
 
+prop_isStochastic :: (MDP.MDP Int Int) -> Bool
+prop_isStochastic mdp = isStochastic mdp 0.0
+
 tests = [ quickCheckResult (prop_zeroCostFunction :: (MDP.MDP Int Int) -> Bool)
-        , quickCheckResult (prop_increasing :: (MDP.MDP Int Int) -> Bool)]
+        , quickCheckResult (prop_increasing :: (MDP.MDP Int Int) -> Bool)
+        , quickCheckResult (prop_isStochastic :: (MDP.MDP Int Int) -> Bool)]
 
 main = do
   results <- mapM id tests

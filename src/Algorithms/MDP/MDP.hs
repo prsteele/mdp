@@ -33,39 +33,6 @@ data MDP a b = MDP
                , unDiscountFactor :: DiscountFactor
                }
 
-instance (Show a, Show b) => Show (MDP a b) where
-  show mdp = unlines [unwords ["States" , show (unStates mdp)]
-                     , unwords ["Actions" , show (unActions mdp)]
-                     , "Transition probabilities:"
-                     , showTransitionMatrix mdp
-                     , "Allowed actions:"
-                     , showActionSet mdp
-                     , "Costs:"
-                     , showCosts mdp
-                     , unwords ["Discount factor", show (unDiscountFactor mdp)]
-                     ]
-
-showTransitionMatrix :: (Show a, Show b) => MDP a b -> String
-showTransitionMatrix mdp = let
-  triples = [(s, t, a) | s <- unStates mdp, t <- unStates mdp, a <- unActions mdp]
-  trans = unTransition mdp
-  in unlines [unwords [show (s, t, a), show (trans a s t)] | (s, t, a) <- triples]
-
-showActionSet :: (Show a, Show b) => MDP a b -> String
-showActionSet mdp = let
-  states = unStates mdp
-  actionSet = unActionSet mdp
-  in unlines [unwords [show s, show (actionSet s)] | s <- states]
-
-showCosts :: (Show a, Show b) => MDP a b -> String
-showCosts mdp = let
-  costFn  = unCosts mdp
-  states  = unStates mdp
-  actions = unActions mdp
-  actionSet = unActionSet mdp
-  in unlines [unwords [show s, show (costFn a s)] | s <- states, a <- actionSet s]
-  
-
 -- | Constructs a new MDP.
 --
 -- The Neighbor function is computed automatically.

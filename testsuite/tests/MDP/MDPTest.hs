@@ -4,6 +4,9 @@ import Algorithms.MDP.ValueIteration
 import MDPArbitrary
 
 import Test.QuickCheck
+import Test.QuickCheck.Test
+import Control.Monad
+import System.Exit
 
 increasing :: (Ord a) => [a] -> Bool
 increasing (p:q:qs) = if p <= q
@@ -21,11 +24,15 @@ prop_increasing mdp = let
   increasingFor s = increasing (take 10 (valuesFor s))
   in all increasingFor (unStates mdp)
 
--- -- prop_isStochastic :: ValidTrans -> Bool
--- -- prop_isStochastic (ValidTrans trans) = let
--- --   mdp = mkMDP states actions trans (\a b -> 0) (\a -> actions) 1.0
--- --   in isStochastic mdp 0
+prop_zeroCostFunction :: (Ord a, Ord b) => MDP.MDP a b -> Bool
+prop_zeroCostFunction mdp = let
+  zero = mkZeroCostFunction mdp
+  in and [snd (zero s) == 0 | s <- MDP.unStates mdp]
 
-example = mkMDP [1] [1, 2] (\a _ _ -> if a == 2 then 1 else 0) (\_ _ -> 2.67) (\_ -> [2]) 0.5
+tests = [ quickCheckResult (prop_zeroCostFunction :: (MDP.MDP Int Int) -> Bool)
+        , quickCheckResult (prop_increasing :: (MDP.MDP Int Int) -> Bool)]
 
-main = quickCheck (prop_increasing :: (MDP.MDP Int Int) -> Bool)
+main = do
+  results <- mapM id tests
+  unless (all isSuccess results) exitFailure 
+

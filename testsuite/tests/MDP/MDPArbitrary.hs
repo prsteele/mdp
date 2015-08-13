@@ -39,7 +39,7 @@ arbitraryActionSet states actions = do
 -- vector.
 arbitraryPDF :: [a] -> Gen [Double]
 arbitraryPDF xs = do
-  probs <- (vector (length xs)) :: Gen [Double]
+  probs <- resize 100 ((vector (length xs)) :: Gen [Double])
   return [abs p / (sum (map abs probs)) | p <- probs]
 
 arbitraryTransitionMatrix :: (Ord a, Ord b) =>
@@ -89,38 +89,3 @@ instance Arbitrary (MDP.MDP Int Int) where
     transMat  <- arbitraryTransitionMatrix states actionSet
     discount  <- arbitraryDiscount
     return $ mkMDP states actions transMat costFn actionSet discount
-
-  shrink mdp = let
-    states  = MDP.unStates mdp
-    actions = MDP.unActions mdp
-    in do
-      states'  <- filter (/= []) (shrink states)
-      actions' <- filter (/= []) (shrink actions)
-      return $ mdp { unStates     = states'
-                   , unActions    = actions'
-                   , unTransition = rescaledTransitionMatrix states' actions' mdp
-                   , unActionSet  = truncatedActionSet states' actions' mdp
-                   }
-
--- | When we truncate the state space, we need to shift the missing
--- probability mass around. We disperse it equally over all remaining
--- transitions.
-rescaledTransitionMatrix :: (Eq a) => [a] -> [b] -> MDP.MDP a b -> (b -> a -> a -> Double)
-rescaledTransitionMatrix states' actions' mdp =
-  let
-    states     = MDP.unStates mdp
-    actions    = MDP.unActions mdp
-    trans      = MDP.unTransition mdp
-    total a s  = sum [trans a s t | t <- states']
-  in \a s t -> trans a s t + (1 - total a s) / fromIntegral (length states')
-
-truncatedActionSet :: (Eq b) => [a] -> [b] -> MDP.MDP a b -> (a -> [b])
-truncatedActionSet states' actions' mdp = let
-  actionSet = MDP.unActionSet mdp
-  filterFor s = filter (`elem` actions') (actionSet s)
-  in \s -> let remaining = filterFor s
-           in if null remaining
-              then actions'
-              else remaining
-
-                 

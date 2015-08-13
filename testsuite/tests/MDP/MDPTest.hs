@@ -29,14 +29,27 @@ prop_zeroCostFunction mdp = let
   zero = mkZeroCostFunction mdp
   in and [snd (zero s) == 0 | s <- MDP.unStates mdp]
 
-prop_isStochastic :: (MDP.MDP Int Int) -> Bool
-prop_isStochastic mdp = isStochastic mdp 0.0
+prop_isStochastic :: (Ord a, Ord b) => (MDP.MDP a b) -> Bool
+prop_isStochastic mdp = isStochastic mdp 1e-3
 
-tests = [ quickCheckResult (prop_zeroCostFunction :: (MDP.MDP Int Int) -> Bool)
-        , quickCheckResult (prop_increasing :: (MDP.MDP Int Int) -> Bool)
-        , quickCheckResult (prop_isStochastic :: (MDP.MDP Int Int) -> Bool)]
+ tests = [ ("prop_zerocostfunction"
+           , quickCheckResult (prop_zeroCostFunction :: (MDP.MDP Int Int) -> Bool))
+         , ("prop_increasing"
+           , quickCheckResult (prop_increasing :: (MDP.MDP Int Int) -> Bool))
+         , ("prop_isStochastic"
+           , quickCheckResult (prop_isStochastic :: (MDP.MDP Int Int) -> Bool))]
+
+printFailures results = let
+  failedTests = filter (isSuccess . fst) (zip results tests)
+  failedNames = map (fst . snd) failedTests
+  in if null failedTests
+     then return ()
+     else do
+       putStrLn "Failed tests:"
+       mapM_ putStrLn failedNames
 
 main = do
-  results <- mapM id tests
+  results <- mapM snd tests
+  printFailures results
   unless (all isSuccess results) exitFailure 
 

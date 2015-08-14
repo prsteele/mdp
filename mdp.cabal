@@ -36,17 +36,11 @@ executable ex-3-2
   build-depends:       base ==4.6.*, array, containers, parallel
   hs-source-dirs:      src
 
-test-suite MDPTest
+test-suite TestMain
   hs-source-dirs:     testsuite/tests/MDP, src/
-  main-is:            MDPTest.hs
+  main-is:            TestMain.hs
   type:               exitcode-stdio-1.0
-  build-depends:      base ==4.6.*, array, containers, parallel, QuickCheck >=2.8.1
-
-test-suite ValueIterationTest
-  hs-source-dirs:     testsuite/tests/MDP, src/
-  main-is:            ValueIterationTest.hs
-  type:               exitcode-stdio-1.0
-  build-depends:      base ==4.6.*, array, containers, parallel, QuickCheck >=2.8.1
+  build-depends:      base >= 4 && < 5, HTF == 0.13.*, QuickCheck >=2.8.1, containers, HUnit, array
 
 source-repository head
   type:     git

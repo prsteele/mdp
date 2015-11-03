@@ -32,6 +32,17 @@ data FlatMDP a b t = FlatMDP
                      , _toOriginalA    :: Action -> b
                      }
 
+getCost' :: FlatMDP a b t -> CostFunction t -> a -> t
+getCost' mdp cf s = fst (cf V.! s')
+  where
+    State s' = _fromOriginalS mdp s
+
+getAction' :: FlatMDP a b t -> CostFunction t -> a -> b
+getAction' mdp cf s = (_toOriginalA mdp) a'
+  where
+    State s' = _fromOriginalS mdp s
+    a' = snd (cf V.! s')
+
 -- | Get the probability of transitioning to state t from state s when
 -- taking action a.
 getProbability mdp (Action a) (State s) (State t) =
@@ -90,4 +101,4 @@ mkFlatMDP states actions trans cost actionSet discount =
 
 -- | A CostFunction is a mapping from states to the payoff in that
 -- state.
-type CostFunction t = V.Vector t
+type CostFunction t = V.Vector (t, Action)

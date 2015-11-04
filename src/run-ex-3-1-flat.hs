@@ -5,18 +5,18 @@ import Algorithms.MDP.FlatValueIteration
 import qualified Data.Vector as V
 
 converging :: Double
-              -> (FlatCostFunction Double, FlatCostFunction Double)
+              -> (FlatCostFunction' States Controls Double, FlatCostFunction' States Controls Double)
               -> Bool
 converging tol (cf, cf') = abs (x - y) > tol
   where
-    x = fst (cf V.! 0)
-    y = fst (cf' V.! 0)
+    x = (\(_, _, c) -> c) (cf V.! 0)
+    y = (\(_, _, c) -> c) (cf' V.! 0)
 
-iterations = valueIteration mdp
+iterations = valueIteration' mdp
 
 main = do
   mapM_ (putStrLn . showAll) $ take 100 iterations
   where
-    showCosts cf = [getCost' mdp cf A, getCost' mdp cf B]
-    showActions cf = [getAction' mdp cf A, getAction' mdp cf B]
+    showCosts cf = V.map (\(_, _, c) -> c) cf
+    showActions cf = V.map (\(_, a, _) -> a) cf
     showAll cf = show (showCosts cf) ++ " " ++ show (showActions cf)

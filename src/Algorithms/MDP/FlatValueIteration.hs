@@ -5,23 +5,22 @@ import Control.Monad.Trans.Writer.Lazy
 import qualified Data.Vector as V
 import Data.List (minimumBy)
 
+import Algorithms.MDP.MDP (CostFunction)
 import Algorithms.MDP.FlatMDP
 
-type Logger t w = CostFunction t -> w
-
--- valueIterationW :: [CostFunction t] -> Logger t w -> FlatMDP a b t -> Writer [t] [CostFunction
--- valueIterationW acc logger mdp =
+-- valueIterationW :: FlatMDP a b t -> Writer [CostFunction a b] [FlatCostFunction]
+-- valueIterationW mdp =
 --   let
 --     State nStates = _stateSpace mdp
 --     zero = V.replicate nStates 0
 
 --     itAndLog cf = do
---       tell (logger cf)
+--       tell cf
 --       return (valueIterate mdp cf)
 --   in do
 --     cf' <- itAndLog cf
 
-valueIteration :: (Ord t, Num t) => FlatMDP a b t -> [CostFunction t]
+valueIteration :: (Ord t, Num t) => FlatMDP a b t -> [FlatCostFunction t]
 valueIteration mdp =
   let
     State nStates = _stateSpace mdp
@@ -29,13 +28,13 @@ valueIteration mdp =
   in
     iterate (valueIterate mdp) zero
 
-valueIterate :: (Ord t, Num t) => FlatMDP a b t -> CostFunction t -> CostFunction t
+valueIterate :: (Ord t, Num t) => FlatMDP a b t -> FlatCostFunction t -> FlatCostFunction t
 valueIterate mdp cf = V.fromList $ map (choiceFor mdp cf) (map State [0..nStates - 1])
   where
     State nStates = _stateSpace mdp
 
 -- | The cost of choosing an action in a state.
-costForAction :: (Num t) => FlatMDP a b t -> CostFunction t -> Action -> State -> (t, Action)
+costForAction :: (Num t) => FlatMDP a b t -> FlatCostFunction t -> Action -> State -> (t, Action)
 costForAction mdp cf a s = 
   let
     alpha     = _discountFactor mdp
@@ -53,7 +52,7 @@ costForAction mdp cf a s =
     (fixedCost + alpha * transitionCost, a)
 
 -- | Find the minimum cost that can be achieved in this state
-choiceFor :: (Ord t, Num t) => FlatMDP a b t -> CostFunction t -> State -> (t, Action)
+choiceFor :: (Ord t, Num t) => FlatMDP a b t -> FlatCostFunction t -> State -> (t, Action)
 choiceFor mdp cf s =
   let
     State s' = s

@@ -23,27 +23,27 @@ import qualified Data.Map as Map
 --
 -- The 'Neighbors' function is used to speed up computations, and can
 -- be computed automatically using the 'mkMDP' function.
-data MDP a b = MDP
-               { unStates         :: [a]
-               , unActions        :: [b]
-               , unTransition     :: Transition a b
-               , unCosts          :: StateCost a b
-               , unActionSet      :: ActionSet a b
-               , unNeighbors      :: Neighbors a b
-               , unDiscountFactor :: DiscountFactor
+data MDP a b t = MDP
+                 { unStates         :: [a]
+                 , unActions        :: [b]
+                 , unTransition     :: Transition a b t
+                 , unCosts          :: StateCost a b t
+                 , unActionSet      :: ActionSet a b
+                 , unNeighbors      :: Neighbors a b t
+                 , unDiscountFactor :: t
                }
 
 -- | Constructs a new MDP.
 --
 -- The Neighbor function is computed automatically.
-mkMDP :: (Ord a, Ord b) => 
-  [a]                 -- ^ The state space
-  -> [b]              -- ^ The action space
-  -> (Transition a b) -- ^ The transition probabilities
-  -> (StateCost a b)  -- ^ The cost of each state
-  -> (ActionSet a b)  -- ^ The actions available at each state
-  -> DiscountFactor   -- ^ The discount factor
-  -> MDP a b          -- ^ The resulting MDP
+mkMDP :: (Ord a, Ord b, Ord t, Num t) => 
+  [a]                   -- ^ The state space
+  -> [b]                -- ^ The action space
+  -> (Transition a b t) -- ^ The transition probabilities
+  -> (StateCost a b t)  -- ^ The cost of each state
+  -> (ActionSet a b)    -- ^ The actions available at each state
+  -> t                  -- ^ The discount factor
+  -> MDP a b t          -- ^ The resulting MDP
 mkMDP stateSpace actionSpace trans cost actionSet discount =
   let
     neighbors = mkNeighbors stateSpace trans actionSet
@@ -62,11 +62,11 @@ mkMDP stateSpace actionSpace trans cost actionSet discount =
 -- Since 'b' is a neighbor of 'a' if the transition probability from
 -- 'a' to 'b' is positive for some action, the function can be
 -- computed automatically from the provided information.
-mkNeighbors :: (Ord a, Ord b) =>
-               [a] -- ^ The state space
-               -> (Transition a b) -- ^ The transition probabilities
-               -> (ActionSet a b) -- ^ The actions available at each state
-               -> Neighbors a b -- ^ The implied neighbors function
+mkNeighbors :: (Ord a, Ord b, Ord t, Num t) =>
+               [a]                   -- ^ The state space
+               -> (Transition a b t) -- ^ The transition probabilities
+               -> (ActionSet a b)    -- ^ The actions available at each state
+               -> Neighbors a b t    -- ^ The implied neighbors function
 mkNeighbors stateSpace trans actionSet = let
   neighbors a s = [(t, trans a s t) | t <- stateSpace, trans a s t > 0]
   neighborMap = Map.fromList $ [((a, s), neighbors a s)
@@ -75,11 +75,11 @@ mkNeighbors stateSpace trans actionSet = let
 
 -- | A transition function describes the action-dependent transition
 -- probabilities between origin and destination states.
-type Transition a b = b -> a -> a -> Double
+type Transition a b t = b -> a -> a -> t
 
 -- | A cost function describes the action-dependent cost of being in a
 -- state.
-type StateCost a b = b -> a -> Double
+type StateCost a b t = b -> a -> t
 
 -- | An action set describes the set of actions that can be taken in a
 -- given state.
@@ -93,18 +93,15 @@ type ActionSet a b = a -> [b]
 -- action space, and a 'Transition' function; in fact, this function
 -- is computed automatically when using the 'mkMDP' convenience
 -- constructor.
-type Neighbors a b = b -> a -> [(a, Double)]
-
--- | A discount factor in the interval (0, 1].
-type DiscountFactor = Double
+type Neighbors a b t = b -> a -> [(a, t)]
 
 -- | A CostFunction is a mapping from states to the action to be taken
 -- in that state to achieve the specified payoff.
-type CostFunction a b = a -> (b, Double)
+type CostFunction a b t = a -> (b, t)
 
 -- | Creates a cost function that maps each state to an arbitrary
 -- action and zero cost.
-mkZeroCostFunction :: (Ord a, Ord b) => MDP a b -> CostFunction a b
+mkZeroCostFunction :: (Ord a, Ord b, Num t) => MDP a b t -> CostFunction a b t
 mkZeroCostFunction mdp =
   let
     stateSpace = unStates mdp
@@ -119,7 +116,7 @@ mkZeroCostFunction mdp =
 -- transition probabilities to each other state must sum to 1 (within
 -- the given tolerance), and all transition probabilities must be
 -- nonnegative.
-isStochastic :: MDP a b -> Double -> Bool
+isStochastic :: (Ord t, Num t) => MDP a b t -> t -> Bool
 isStochastic mdp tol = null $ nonStochastic mdp tol
 
 -- | Returns the non-stochastic (action, state) pairs in an 'MDP'.
@@ -128,7 +125,7 @@ isStochastic mdp tol = null $ nonStochastic mdp tol
 -- the state occur with negative probability, or if the total
 -- probability all possible transitions is not 1 (within the given
 -- tolerance).
-nonStochastic :: MDP a b -> Double -> [(b, a, Double)]
+nonStochastic :: (Ord t, Num t) => MDP a b t -> t -> [(b, a, t)]
 nonStochastic mdp tol =
   let
     stateSpace = unStates mdp
@@ -159,7 +156,7 @@ nonStochastic mdp tol =
 -- > costFunctions = valueIteration mdp
 -- > pairs = zip costFunctions (tail costFunctions)
 -- > solution = head $ dropWhile (uncurry (converging mdp 0.01)) pairs
-converging :: MDP a b -> Double -> CostFunction a b -> CostFunction a b -> Bool
+converging :: (Ord t, Floating t) => MDP a b t -> t -> CostFunction a b t -> CostFunction a b t -> Bool
 converging mdp tol cf cf' =
   let
     stateSpace = unStates mdp

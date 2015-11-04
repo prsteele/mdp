@@ -11,7 +11,8 @@ import Algorithms.MDP.MDP
 --
 -- The fixed point of this iteration is the optimal solution to the
 -- problem, but this may not be achieved in finite time.
-valueIterate :: (Ord a, Ord b) => MDP a b -> CostFunction a b -> CostFunction a b
+valueIterate :: (Ord a, Ord b, Ord t, Num t) =>
+                MDP a b t -> CostFunction a b t -> CostFunction a b t
 valueIterate mdp cf =
   let
     cost = unCosts mdp
@@ -38,17 +39,17 @@ valueIterate mdp cf =
 --
 -- Returns an infinite sequence of 'CostFunction's that approach an
 -- optimal 'CostFunction'.
-valueIteration :: (Ord a, Ord b) => MDP a b -> [CostFunction a b]
+valueIteration :: (Ord a, Ord b, Ord t, Num t) => MDP a b t -> [CostFunction a b t]
 valueIteration mdp = iterate (valueIterate mdp) (mkZeroCostFunction mdp)
 
 relativeValueIterate ::
-  (Ord a, Ord b) =>
-  MDP a b             -- ^ The MDP to solve
-  -> a                -- ^ A distinguished state
-  -> DCFAndBounds a b -- ^ The current estimate of the differential
-                      -- cost vector
-  -> DCFAndBounds a b -- ^ The resulting bounds and differential cost
-                      -- vector
+  (Ord a, Ord b, Ord t, Num t) =>
+  MDP a b t             -- ^ The MDP to solve
+  -> a                  -- ^ A distinguished state
+  -> DCFAndBounds a b t -- ^ The current estimate of the differential
+                        -- cost vector
+  -> DCFAndBounds a b t -- ^ The resulting bounds and differential
+                        -- cost vector
 relativeValueIterate mdp distinguished (cf, _, _, _ ) =
   let
     stateSpace = unStates mdp
@@ -81,12 +82,12 @@ relativeValueIterate mdp distinguished (cf, _, _, _ ) =
 --
 -- This method also utilizes a distinguished state @s@. Given this state, 
 relativeValueIteration
-  :: (Ord a, Eq a, Ord b, Eq b) =>
-     MDP a b               -- ^ The MDP to solve
-     -> a                  -- ^ A distinguished state
-     -> Double             -- ^ The value of tau
-     -> [DCFAndBounds a b] -- ^ The resulting sequence of bounds and
-                           -- differential cost vectors
+  :: (Ord a, Eq a, Ord b, Eq b, Ord t, Num t) =>
+     MDP a b t               -- ^ The MDP to solve
+     -> a                    -- ^ A distinguished state
+     -> t                    -- ^ The value of tau
+     -> [DCFAndBounds a b t] -- ^ The resulting sequence of bounds and
+                             -- differential cost vectors
 relativeValueIteration mdp distinguished tau =
   let
     trans = unTransition mdp
@@ -104,15 +105,15 @@ relativeValueIteration mdp distinguished tau =
 -- | A differential cost vector is a function that maps each state to
 -- the difference in cost between that state and some distinguished
 -- state and the action needed to achieve that cost.
-type DifferentialCostVector a b = CostFunction a b
+type DifferentialCostVector a b t = CostFunction a b t
 
 -- | A differential cost vector paired with an estimate, lower-bound,
 -- and upper-bound on the optimal average cost per stage.
-type DCFAndBounds a b =
-  (DifferentialCostVector a b, Double, Double, Double)
+type DCFAndBounds a b t =
+  (DifferentialCostVector a b t, t, t, t)
 
-gap :: DCFAndBounds a b -> Double
+gap :: (Ord t, Num t) => DCFAndBounds a b t -> t
 gap (_, _, lb, ub) = ub - lb
 
-optimalCost :: DCFAndBounds a b -> Double
+optimalCost :: DCFAndBounds a b t -> t
 optimalCost (_, opt, _, _ ) = opt

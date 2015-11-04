@@ -3,7 +3,7 @@ import Algorithms.MDP.MDP
 import Algorithms.MDP.ValueIteration
 
 converging :: Double
-              -> (CostFunction States Controls, CostFunction States Controls)
+              -> (CostFunction States Controls Double, CostFunction States Controls Double)
               -> Bool
 converging tol (cf, cf') = abs (x - y) > tol
   where

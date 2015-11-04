@@ -24,36 +24,36 @@ import qualified Algorithms.MDP.MDP as MDP (MDP)
 --
 -- The 'Neighbors' function is used to speed up computations, and can
 -- be computed automatically using the 'mkCTMDP' function.
-data CTMDP a b = CTMDP
-                 { _states         :: [a]
-                 , _actions        :: [b]
-                 , _transitions    :: Transition a b
-                 , _rateCosts      :: StateCost a b
-                 , _fixedCosts     :: StateCost a b
-                 , _rates          :: TransitionRate a b
-                 , _actionSet      :: ActionSet a b
-                 , _neighbors      :: Neighbors a b
-                 , _discount       :: Double
-                 }
+data CTMDP a b t = CTMDP
+                   { _states         :: [a]
+                   , _actions        :: [b]
+                   , _transitions    :: Transition a b t
+                   , _rateCosts      :: StateCost a b t
+                   , _fixedCosts     :: StateCost a b t
+                   , _rates          :: TransitionRate a b t
+                   , _actionSet      :: ActionSet a b
+                   , _neighbors      :: Neighbors a b t
+                   , _discount       :: t
+                   }
 
 -- | A transition rate function describes the action-dependent rate at
 -- which transitions out of a state occur. The rates are the rate
 -- parameter of an exponential random variable.
-type TransitionRate a b = b -> a -> Double
+type TransitionRate a b t = b -> a -> t
 
 -- | Constructs a new CTMDP.
 --
 -- The 'Neighbor' function is computed automatically.
-mkCTMDP :: (Ord a, Ord b) =>
-  [a]                     -- ^ The state space
-  -> [b]                  -- ^ The action space
-  -> (Transition a b)     -- ^ The transition probabilities
-  -> (StateCost a b)      -- ^ The rate cost of each state
-  -> (StateCost a b)      -- ^ The fixed cost of each state
-  -> (ActionSet a b)      -- ^ The actions available at each state
-  -> (TransitionRate a b) -- ^ The rates at which transitions occur
-  -> Double               -- ^ The discount factor
-  -> CTMDP a b            -- ^ The resulting CTMDP
+mkCTMDP :: (Ord a, Ord b, Ord t, Num t) =>
+  [a]                       -- ^ The state space
+  -> [b]                    -- ^ The action space
+  -> (Transition a b t)     -- ^ The transition probabilities
+  -> (StateCost a b t)      -- ^ The rate cost of each state
+  -> (StateCost a b t)      -- ^ The fixed cost of each state
+  -> (ActionSet a b)        -- ^ The actions available at each state
+  -> (TransitionRate a b t) -- ^ The rates at which transitions occur
+  -> t                      -- ^ The discount factor
+  -> CTMDP a b t            -- ^ The resulting CTMDP
 mkCTMDP states actions trans rateCost fixedCost actionSet transRate discount =
   let
     neighbors = mkNeighbors states trans actionSet
@@ -76,7 +76,8 @@ mkCTMDP states actions trans rateCost fixedCost actionSet transRate discount =
 -- fastest transition rate.
 --
 -- See Bertsekas p. 249.
-uniformize :: (Ord a, Eq a, Ord b, Eq b) => CTMDP a b -> MDP.MDP a b
+uniformize :: (Ord a, Eq a, Ord b, Eq b, Ord t, Fractional t) => 
+              CTMDP a b t -> MDP.MDP a b t
 uniformize ctmdc = let
   states     = _states ctmdc
   actions    = _actions ctmdc

@@ -3,6 +3,8 @@ module Algorithms.MDP.FlatMDP where
 import Control.Monad.ST
 import qualified Data.Vector as V
 
+import Algorithms.MDP.MDP (CostFunction)
+
 -- | A state in the MDP.
 newtype State = State Int
               deriving (Eq, Show)
@@ -32,12 +34,23 @@ data FlatMDP a b t = FlatMDP
                      , _toOriginalA    :: Action -> b
                      }
 
-getCost' :: FlatMDP a b t -> CostFunction t -> a -> t
+-- | A CostFunction is a mapping from states to the payoff in that
+-- state.
+type FlatCostFunction t = V.Vector (t, Action)
+
+getOriginalCF :: FlatMDP a b t -> FlatCostFunction t -> CostFunction a b t
+getOriginalCF mdp cf' s = (ac, c)
+  where
+    (c, ac') = cf' V.! s'
+    ac = _toOriginalA mdp ac'
+    State s' = _fromOriginalS mdp s
+
+getCost' :: FlatMDP a b t -> FlatCostFunction t -> a -> t
 getCost' mdp cf s = fst (cf V.! s')
   where
     State s' = _fromOriginalS mdp s
 
-getAction' :: FlatMDP a b t -> CostFunction t -> a -> b
+getAction' :: FlatMDP a b t -> FlatCostFunction t -> a -> b
 getAction' mdp cf s = (_toOriginalA mdp) a'
   where
     State s' = _fromOriginalS mdp s
@@ -98,7 +111,3 @@ mkFlatMDP states actions trans cost actionSet discount =
      , _fromOriginalS  = _fromOriginalS
      , _fromOriginalA  = _fromOriginalA
      }
-
--- | A CostFunction is a mapping from states to the payoff in that
--- state.
-type CostFunction t = V.Vector (t, Action)

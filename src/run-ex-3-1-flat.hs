@@ -5,7 +5,7 @@ import Algorithms.MDP.FlatValueIteration
 import qualified Data.Vector as V
 
 converging :: Double
-              -> (CostFunction Double, CostFunction Double)
+              -> (FlatCostFunction Double, FlatCostFunction Double)
               -> Bool
 converging tol (cf, cf') = abs (x - y) > tol
   where

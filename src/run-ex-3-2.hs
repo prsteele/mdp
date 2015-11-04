@@ -14,7 +14,7 @@ takeWhile2 p as = map fst $ takeWhile (uncurry p) (zip as (tail as))
 
 distinguished = A
 
-showAll :: DCFAndBounds States Controls -> String
+showAll :: DCFAndBounds States Controls Double -> String
 showAll (cf, opt, lb, ub) = unwords [show (cf A), show (cf B), show opt, show lb, show ub]
 
 main = do

@@ -27,6 +27,4 @@ alpha = 9 / 10
 states = [A, B]
 controls = [U1, U2]
 
-mdp = mkFlatMDP' states controls transition cost (\_ -> controls) alpha
-
-iters = valueIteration' mdp
+mdp = mkFlatMDP states controls transition cost (\_ -> controls) alpha

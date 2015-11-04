@@ -18,6 +18,8 @@ newtype Action = Action Int
 -- taken to achieve that cost.
 type FlatCostFunction a b t = V.Vector (a, b, t)
 
+type FlatCostFunctionBounds a b t = (FlatCostFunction a b t, t, t)
+
 -- | An efficient representation of an MDP.
 --
 -- We pack all transition probabilities and costs into vectors.

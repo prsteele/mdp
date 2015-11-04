@@ -43,3 +43,27 @@ costForAction mdp cf (State st) (Action ac) =
     transCost = inner (__trans mdp V.! ac V.! st) (V.map (\(_, _, c) -> c) cf)
   in
     fixedCost + alpha * transCost
+
+relativeValueIteration mdp =
+  let
+    states = __states mdp
+    actions = __actions mdp
+    
+    zero = V.replicate (V.length states) (V.head states, V.head actions, 0)
+  in
+    iterate (relativeValueIterate mdp) (zero, read "-Infinity", read "Infinity")
+
+relativeValueIterate :: (Ord t, Fractional t) => 
+                        FlatMDP a b t 
+                        -> FlatCostFunctionBounds a b t 
+                        -> FlatCostFunctionBounds a b t
+relativeValueIterate mdp (cf, _, _) =
+  let
+    alpha = __discount mdp
+    cf' = valueIterate mdp cf
+    (lb, ub) = (V.minimum diffs, V.maximum diffs)
+      where
+        diffs = V.zipWith (\(_, _, a) (_, _, b) -> a - b) cf' cf
+    scale = alpha / (1 - alpha)
+  in 
+    (cf', scale * lb, scale * ub)

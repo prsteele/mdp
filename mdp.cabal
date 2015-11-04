@@ -38,6 +38,12 @@ executable ex-3-1-flat
                        transformers ==0.4.2.*
   hs-source-dirs:      src
 
+executable ex-3-1-relative
+  main-is:             run-ex-3-1-relative.hs
+  build-depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*,
+                       transformers ==0.4.2.*
+  hs-source-dirs:      src
+
 executable ex-3-2
   main-is:             run-ex-3-2.hs
   build-depends:       base ==4.8.*, array, containers, parallel

@@ -1,9 +1,12 @@
+import Data.Maybe (fromJust)
+import qualified Data.Vector as V
+
+import Algorithms.MDP.Examples.Ex_3_1 hiding (mdp, cost)
 import Algorithms.MDP.Examples.Ex_3_2
-
 import Algorithms.MDP.MDP
-import Algorithms.MDP.ValueIteration
+import Algorithms.MDP.UndiscountedValueIteration
 
-iterations = relativeValueIteration mdp distinguished 0.25
+iterations = relativeValueIteration mdp
 pairs = zip iterations (tail iterations)
 
 -- | Takes elements from a list while each adjacent pair of elements
@@ -14,12 +17,8 @@ takeWhile2 p as = map fst $ takeWhile (uncurry p) (zip as (tail as))
 
 distinguished = A
 
-showAll :: DCFAndBounds States Controls Double -> String
-showAll (cf, opt, lb, ub) = unwords [show (cf A), show (cf B), show opt, show lb, show ub]
+showAll (DifferentialCF c h) = unwords [show c, show h]--unwords [show (cost h A), show (cost h B), show c]
 
 main = do
-  if isStochastic mdp 0
-    then mapM_ (putStrLn . showAll) $ map fst $ take 11 pairs
-    else do
-         putStrLn "Non-stochastic states"
-         mapM_ (putStrLn . show) $ nonStochastic mdp 0
+  mapM_ (putStrLn . showAll) $ take 100 iterations
+

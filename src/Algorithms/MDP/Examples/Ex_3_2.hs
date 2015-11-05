@@ -1,18 +1,7 @@
-module Algorithms.MDP.Examples.Ex_3_2 (
-  States (..)
-  , Controls (..)
-  , transition
-  , cost
-  , states
-  , controls
-  , alpha
-  , mdp
-  ) where
+module Algorithms.MDP.Examples.Ex_3_2 where
 
-import Algorithms.MDP.Examples.Ex_3_1 hiding (alpha, mdp)
+import Algorithms.MDP.Examples.Ex_3_1 hiding (mdp)
 
-import Algorithms.MDP.MDP
+import Algorithms.MDP.UndiscountedMDP
 
-alpha = 1.0
-
-mdp = mkMDP states controls transition cost (\_ -> controls) alpha
+mdp = mkUndiscountedMDP states controls transition cost (\_ -> controls)

@@ -2,163 +2,133 @@
 
 -- | The main module for modeling Markov decision processes (MDP).
 --
--- The primary data structure is the 'MDP', which consists of a state
--- space, an action space, transition probabilities, state costs, and
--- actions allowed at each state.
---
 -- We are primarily concerned with infinite horizon MDPs, both
 -- discounted and undiscounted.
 module Algorithms.MDP.MDP where
 
-import qualified Data.Map as Map
+import Control.Monad
+import qualified Data.Vector as V
 
--- | A Markov decision process with states of type @a@ and actions of type @b@.
---
--- A Markov decision process contains a state space, a set of actions
--- at each state, action-dependent transition probabilities between
--- states, and action-dependent costs for each state.
---
--- Elements of type @a@ are in the state space, while elements of type
--- @b@ are actions or controls.
---
--- The 'Neighbors' function is used to speed up computations, and can
--- be computed automatically using the 'mkMDP' function.
-data MDP a b t = MDP
-                 { unStates         :: [a]
-                 , unActions        :: [b]
-                 , unTransition     :: Transition a b t
-                 , unCosts          :: StateCost a b t
-                 , unActionSet      :: ActionSet a b
-                 , unNeighbors      :: Neighbors a b t
-                 , unDiscountFactor :: t
-               }
+-- | A type representing an action- and state-dependent probablity
+-- vector.
+type Transitions a b t = b -> a -> a -> t
 
--- | Constructs a new MDP.
---
--- The Neighbor function is computed automatically.
-mkMDP :: (Ord a, Ord b, Ord t, Num t) => 
-  [a]                   -- ^ The state space
-  -> [b]                -- ^ The action space
-  -> (Transition a b t) -- ^ The transition probabilities
-  -> (StateCost a b t)  -- ^ The cost of each state
-  -> (ActionSet a b)    -- ^ The actions available at each state
-  -> t                  -- ^ The discount factor
-  -> MDP a b t          -- ^ The resulting MDP
-mkMDP stateSpace actionSpace trans cost actionSet discount =
-  let
-    neighbors = mkNeighbors stateSpace trans actionSet
-  in MDP { unStates         = stateSpace
-         , unActions        = actionSpace
-         , unTransition     = trans
-         , unCosts          = cost
-         , unActionSet      = actionSet
-         , unNeighbors      = neighbors
-         , unDiscountFactor = discount
-         }
+-- | A type representing an action- and state-dependent cost.
+type Costs a b t = b -> a -> t
 
--- | Computes a 'Neighbors' function from the state space, transition
--- probablities, and allowed actions.
---
--- Since 'b' is a neighbor of 'a' if the transition probability from
--- 'a' to 'b' is positive for some action, the function can be
--- computed automatically from the provided information.
-mkNeighbors :: (Ord a, Ord b, Ord t, Num t) =>
-               [a]                   -- ^ The state space
-               -> (Transition a b t) -- ^ The transition probabilities
-               -> (ActionSet a b)    -- ^ The actions available at each state
-               -> Neighbors a b t    -- ^ The implied neighbors function
-mkNeighbors stateSpace trans actionSet = let
-  neighbors a s = [(t, trans a s t) | t <- stateSpace, trans a s t > 0]
-  neighborMap = Map.fromList $ [((a, s), neighbors a s)
-                               | s <- stateSpace, a <- actionSet s]
-  in curry (neighborMap Map.!)
-
--- | A transition function describes the action-dependent transition
--- probabilities between origin and destination states.
-type Transition a b t = b -> a -> a -> t
-
--- | A cost function describes the action-dependent cost of being in a
--- state.
-type StateCost a b t = b -> a -> t
-
--- | An action set describes the set of actions that can be taken in a
--- given state.
+-- | A type representing the allowed actions in a state.
 type ActionSet a b = a -> [b]
 
--- | A neighbors function describes the action-dependent set of states
--- that can be transitioned to from an origin state, along with the
--- (positive) probabilities of each transition.
+-- | A cost function is a vector containing (state, action, cost)
+-- triples. Each triple describes the cost of taking the action in
+-- that state.
+type CF a b t = V.Vector (a, b, t)
+
+cost :: (Eq a) => CF a b t -> a -> Maybe t
+cost cf s =
+  do
+    (_, _, c) <- V.find (\(s', _, _) -> s == s') cf
+    return c
+
+action :: (Eq a) => CF a b t -> a -> Maybe b
+action cf s =
+  do
+    (_, ac, _) <- V.find (\(s', _, _) -> s == s') cf
+    return ac
+
+-- | A cost function with error bounds. The cost in a (state, action,
+-- cost) triple is guaranteed to be in the range [cost + lb, cost + ub]
+data CFBounds a b t = CFBounds
+                      { _CF :: CF a b t
+                      , _lb :: t
+                      , _ub :: t
+                      }
+
+-- | A DifferentialCF is an estimate of the long-run optimal average
+-- cost per stage along with a differential cost vector describing the
+-- deviation of each cost of a given state from the long-run average
+-- cost.
+data DifferentialCF a b t = DifferentialCF
+                            { _cost :: t
+                            , _h    :: CF a b t
+                            }
+
+-- | A state in the MDP.
+newtype State = State Int
+              deriving (Eq, Show)
+
+-- | An action in the MDP.
+newtype Action = Action Int
+              deriving (Eq, Show)
+
+-- | A Markov decision process.
 --
--- Note that this function can be inferred from a state space, an
--- action space, and a 'Transition' function; in fact, this function
--- is computed automatically when using the 'mkMDP' convenience
--- constructor.
-type Neighbors a b t = b -> a -> [(a, t)]
+-- An MDP consists of a state space, an action space, state- and
+-- action-dependent costs, and state- and action-dependent transition
+-- probabilities. The goal is to compute a policy -- a mapping from
+-- states to actions -- which minimizes the total discounted cost of
+-- the problem, assuming a given discount factor in the range (0, 1].
+data MDP a b t = MDP
+                 { _states    :: V.Vector a
+                 , _actions   :: V.Vector b
+                 , _states'   :: V.Vector State
+                 , _actions'  :: V.Vector Action
+                 , _costs     :: V.Vector (V.Vector t)
+                 , _trans     :: V.Vector (V.Vector (V.Vector t))
+                 , _discount  :: t
+                 , _actionSet :: V.Vector (V.Vector Action)
+                 }
 
--- | A CostFunction is a mapping from states to the action to be taken
--- in that state to achieve the specified payoff.
-type CostFunction a b t = a -> (b, t)
+-- -- | Verifies that a 'MDP' has fully stochastic transition
+-- -- probabilities.
+-- --
+-- -- For each state and allowable action in that state, the sum of
+-- -- transition probabilities to each other state must sum to 1 (within
+-- -- the given tolerance), and all transition probabilities must be
+-- -- nonnegative.
+-- isStochastic :: (Ord t, Num t) => MDP a b t -> t -> Bool
+-- isStochastic mdp tol = null $ nonStochastic mdp tol
 
--- | Creates a cost function that maps each state to an arbitrary
--- action and zero cost.
-mkZeroCostFunction :: (Ord a, Ord b, Num t) => MDP a b t -> CostFunction a b t
-mkZeroCostFunction mdp =
-  let
-    stateSpace = unStates mdp
-    zero       = (head (unActions mdp), 0)
-    pairs      = map (\x -> (x, zero)) stateSpace
-  in ((Map.fromList pairs) Map.!)
+-- -- | Returns the non-stochastic (action, state) pairs in an 'MDP'.
+-- --
+-- -- An (action, state) pair is not stochastic if any transitions out of
+-- -- the state occur with negative probability, or if the total
+-- -- probability all possible transitions is not 1 (within the given
+-- -- tolerance).
+-- nonStochastic :: (Ord t, Num t) => MDP a b t -> t -> [(b, a, t)]
+-- nonStochastic mdp tol =
+--   let
+--     stateSpace = unStates mdp
+--     actionSet = unActionSet mdp
+--     trans = unTransition mdp
+--     isStochastic' (action, state) = all (>= 0) v && abs (1 - sum v) <= tol
+--       where
+--         v = map (trans action state) stateSpace
 
--- | Verifies that a 'MDP' has fully stochastic transition
--- probabilities.
---
--- For each state and allowable action in that state, the sum of
--- transition probabilities to each other state must sum to 1 (within
--- the given tolerance), and all transition probabilities must be
--- nonnegative.
-isStochastic :: (Ord t, Num t) => MDP a b t -> t -> Bool
-isStochastic mdp tol = null $ nonStochastic mdp tol
+--     totalProb action state = sum $ map (trans action state) stateSpace
 
--- | Returns the non-stochastic (action, state) pairs in an 'MDP'.
---
--- An (action, state) pair is not stochastic if any transitions out of
--- the state occur with negative probability, or if the total
--- probability all possible transitions is not 1 (within the given
--- tolerance).
-nonStochastic :: (Ord t, Num t) => MDP a b t -> t -> [(b, a, t)]
-nonStochastic mdp tol =
-  let
-    stateSpace = unStates mdp
-    actionSet = unActionSet mdp
-    trans = unTransition mdp
-    isStochastic' (action, state) = all (>= 0) v && abs (1 - sum v) <= tol
-      where
-        v = map (trans action state) stateSpace
+--     pairs = [(action, state) | state <- stateSpace, action <- actionSet state]
 
-    totalProb action state = sum $ map (trans action state) stateSpace
+--     f (action, state) = (action, state, totalProb action state)
 
-    pairs = [(action, state) | state <- stateSpace, action <- actionSet state]
+--   in map f (filter (not . isStochastic') pairs)
 
-    f (action, state) = (action, state, totalProb action state)
-
-  in map f (filter (not . isStochastic') pairs)
-
--- | Returns True if the two 'CostFunction's have a large difference
--- between them.
---
--- We compute the 2-norm of the difference of the two functions, and
--- return True if the norm is less than the given tolerance.
---
--- This function can be applied to a list of cost functions to
--- determine when the cost functions have converged to within some
--- tolerance, e.g.
---
--- > costFunctions = valueIteration mdp
--- > pairs = zip costFunctions (tail costFunctions)
--- > solution = head $ dropWhile (uncurry (converging mdp 0.01)) pairs
-converging :: (Ord t, Floating t) => MDP a b t -> t -> CostFunction a b t -> CostFunction a b t -> Bool
-converging mdp tol cf cf' =
-  let
-    stateSpace = unStates mdp
-    norm = sum [(snd (cf s) - snd (cf' s)) ** 2 | s <- stateSpace]
-  in norm > tol
+-- -- | Returns True if the two 'CostFunction's have a large difference
+-- -- between them.
+-- --
+-- -- We compute the 2-norm of the difference of the two functions, and
+-- -- return True if the norm is less than the given tolerance.
+-- --
+-- -- This function can be applied to a list of cost functions to
+-- -- determine when the cost functions have converged to within some
+-- -- tolerance, e.g.
+-- --
+-- -- > costFunctions = valueIteration mdp
+-- -- > pairs = zip costFunctions (tail costFunctions)
+-- -- > solution = head $ dropWhile (uncurry (converging mdp 0.01)) pairs
+-- converging :: (Ord t, Floating t) => MDP a b t -> t -> CostFunction a b t -> CostFunction a b t -> Bool
+-- converging mdp tol cf cf' =
+--   let
+--     stateSpace = unStates mdp
+--     norm = sum [(snd (cf s) - snd (cf' s)) ** 2 | s <- stateSpace]
+--   in norm > tol

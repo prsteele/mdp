@@ -17,8 +17,8 @@ takeWhile2 p as = map fst $ takeWhile (uncurry p) (zip as (tail as))
 
 distinguished = A
 
-showAll (DifferentialCF c h) = unwords [show c, show h]--unwords [show (cost h A), show (cost h B), show c]
+showAll (CFBounds h lb ub) = unwords [show h, show lb, show ub]--unwords [show (cost h A), show (cost h B), show c]
 
 main = do
-  mapM_ (putStrLn . showAll) $ take 100 iterations
+  mapM_ (putStrLn . showAll) $ take 20 iterations
 

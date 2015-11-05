@@ -1,10 +1,10 @@
-import Algorithms.MDP.Examples.Ex_3_1_flat
-import Algorithms.MDP.FlatMDP
-import Algorithms.MDP.FlatValueIteration
+import Algorithms.MDP.Examples.Ex_3_1
+import Algorithms.MDP.DiscountedMDP
+import Algorithms.MDP.DiscountedValueIteration
 
 import qualified Data.Vector as V
 
-type CF = FlatCostFunction States Controls Double
+type CF = DiscountedCF States Controls Double
 
 converging :: Double -> (CF, CF) -> Bool
 converging tol (cf, cf') = abs (x - y) > tol

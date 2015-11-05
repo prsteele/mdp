@@ -1,25 +1,22 @@
 import Algorithms.MDP.Examples.Ex_3_1
-import Algorithms.MDP.MDP
-import Algorithms.MDP.ValueIteration
+import Algorithms.MDP.DiscountedMDP
+import Algorithms.MDP.DiscountedValueIteration
 
-converging :: Double
-              -> (CostFunction States Controls Double, CostFunction States Controls Double)
-              -> Bool
+import qualified Data.Vector as V
+
+type CF = DiscountedCF States Controls Double
+
+converging :: Double -> (CF, CF) -> Bool
 converging tol (cf, cf') = abs (x - y) > tol
   where
-    x = snd (cf A)
-    y = snd (cf' A)
+    x = (\(_, _, c) -> c) (cf V.! 0)
+    y = (\(_, _, c) -> c) (cf' V.! 0)
 
 iterations = valueIteration mdp
 
 main = do
-  mapM_ (putStrLn . showAll) $ map fst $ take 100 pairs
+  mapM_ (putStrLn . showAll) $ take 100 iterations
   where
-    pairs = zip iterations (tail iterations)
-    showCosts cf = show $ map (snd . cf) states
-    showChoices cf = show $ map (fst . cf) states
-    showAll cf = (showCosts cf) ++ " " ++ (showChoices cf)
-      
-    
-    
--- takeWhile (converging 0.01)
+    showCosts cf = V.map (\(_, _, c) -> c) cf
+    showActions cf = V.map (\(_, a, _) -> a) cf
+    showAll cf = show (showCosts cf) ++ " " ++ show (showActions cf)

@@ -1,17 +1,18 @@
-module Algorithms.MDP.FlatValueIteration where
+module Algorithms.MDP.DiscountedValueIteration where
 
 import Control.Monad
-import Control.Monad.Trans.Writer.Lazy
 import qualified Data.Vector as V
 import Data.List (minimumBy)
 
-import Algorithms.MDP.MDP (CostFunction)
-import Algorithms.MDP.FlatMDP
+import Algorithms.MDP.DiscountedMDP
 
 inner :: (Num t) => V.Vector t -> V.Vector t -> t
 inner u v = V.sum (V.zipWith (*) u v)
 
-valueIteration :: (Ord t, Num t) => FlatMDP a b t -> [FlatCostFunction a b t]
+valueIteration :: (Ord t, Num t) => 
+                  DiscountedMDP a b t  -- ^ The DiscountedMDP to solve
+               -> [DiscountedCF a b t] -- ^ An converging sequence of
+                                       -- cost functions
 valueIteration mdp =
   let
     states = _states mdp
@@ -21,10 +22,20 @@ valueIteration mdp =
   in
     iterate (valueIterate mdp) zero
 
-valueIterate :: (Ord t, Num t) => FlatMDP a b t -> FlatCostFunction a b t -> FlatCostFunction a b t
+valueIterate :: (Ord t, Num t) => 
+                DiscountedMDP a b t -- ^ The DiscountedMDP we are solving
+             -> DiscountedCF a b t  -- ^ The current cost function estimate
+             -> DiscountedCF a b t  -- ^ The next cost function estimate
 valueIterate mdp cf = V.zipWith (choiceFor mdp cf) (_states' mdp) (_states mdp)
 
-choiceFor :: (Ord t, Num t) => FlatMDP a b t -> FlatCostFunction a b t -> State -> a -> (a, b, t)
+-- | Finds the action that minimizes the one-step payoff using the
+-- given cost function.
+choiceFor :: (Ord t, Num t) =>
+             DiscountedMDP a b t -- ^ The DiscountedMDP we are solving
+          -> DiscountedCF a b t  -- ^ The current cost function
+          -> State               -- ^ The state for which we choose an action
+          -> a                   -- ^ The state for which we choose an action
+          -> (a, b, t)           -- ^ The choice of action and associated cost
 choiceFor mdp cf (State st) s =
   let
     cmp (_, x) (_, y) = compare x y
@@ -35,7 +46,7 @@ choiceFor mdp cf (State st) s =
     (s, ac, c)
 
 costForAction :: (Num t) =>
-                 FlatMDP a b t -> FlatCostFunction a b t -> State -> Action -> t
+                 DiscountedMDP a b t -> DiscountedCF a b t -> State -> Action -> t
 costForAction mdp cf (State st) (Action ac) =
   let
     alpha = _discount mdp
@@ -54,9 +65,9 @@ relativeValueIteration mdp =
     iterate (relativeValueIterate mdp) (zero, read "-Infinity", read "Infinity")
 
 relativeValueIterate :: (Ord t, Fractional t) => 
-                        FlatMDP a b t 
-                        -> FlatCostFunctionBounds a b t 
-                        -> FlatCostFunctionBounds a b t
+                        DiscountedMDP a b t 
+                        -> DiscountedCFBounds a b t 
+                        -> DiscountedCFBounds a b t
 relativeValueIterate mdp (cf, _, _) =
   let
     alpha = _discount mdp

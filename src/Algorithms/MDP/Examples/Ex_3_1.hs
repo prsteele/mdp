@@ -1,9 +1,6 @@
--- | The example from Bertsekas, p. 22.
 module Algorithms.MDP.Examples.Ex_3_1 where
 
-import Data.Array
-
-import Algorithms.MDP.MDP
+import Algorithms.MDP.DiscountedMDP
 
 data States = A | B
             deriving (Show, Ord, Eq)
@@ -29,4 +26,4 @@ alpha = 9 / 10
 states = [A, B]
 controls = [U1, U2]
 
-mdp = mkMDP states controls transition cost (\_ -> controls) alpha
+mdp = mkDiscountedMDP states controls transition cost (\_ -> controls) alpha

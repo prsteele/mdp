@@ -38,8 +38,8 @@ relativeValueIteration mdp =
 
     trans' = V.imap (\a vv -> V.imap (\s v -> update a s v) vv) trans
 
-    tau = 1.0
-    mdp' = mdp { _discount = tau, _trans = trans'}
+    tau = 0.5
+    mdp' = mdp {_trans = trans'}
     zeroV = V.map (\s -> (s, V.head actions, 0)) states
     zero = CFBounds zeroV (read "-Infinity") (read "Infinity")
     distinguished = V.head states'

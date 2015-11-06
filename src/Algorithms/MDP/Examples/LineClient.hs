@@ -9,7 +9,7 @@ import Algorithms.MDP.UndiscountedMDP
 data Action = Depart | Stay
             deriving (Show, Ord, Eq)
 
-type State = (Int, Double, Bool)
+type State = (Int, Double)
 
 factorial = fromIntegral . (factorial' 1)
   where
@@ -30,7 +30,7 @@ mkInstance maxWaiting numDistances arrivalRate serviceTime = let
   distance :: Int -> Double
   distance d = (fromIntegral d) / (fromIntegral numDistances) * serviceTime
 
-  states = [(i, d, j) | i <- [0..maxWaiting], d <- distances, j <- [True, False]]
+  states = [(i, d) | i <- [0..maxWaiting], d <- distances]
 
   -- | Given the current maximum distance d, what is the probability
   -- of moving to a new maximum distance d' when Staying?
@@ -51,6 +51,14 @@ mkInstance maxWaiting numDistances arrivalRate serviceTime = let
 
   -- The normalizing constant for truncating the state space
   norm d = sum [f (distance d) s | (s, d', j) <- states, j == True, d' == d] 
+
+  trans Stay (i, d) (i', d')
+    | i == i' && d == i' = 1 - tau * (nu Stay)
+    | i + 1 == i'        = tau * (nu Stay) * (distProb d d')
+    | otherwise          = 0
+
+  trans Depart (i, d) (i', d')
+    | i == i' && d == d' = 1 - tau * (nu Depart) + tau * (nu Depart) * 
 
   transition Stay (i, d, j) (i', d', j') =
     if (i, d, j) == (i', d', j')

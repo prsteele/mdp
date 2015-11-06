@@ -1,12 +1,10 @@
 module Algorithms.MDP.UndiscountedValueIteration where
 
-import Debug.Trace
-
 import qualified Data.Vector as V
 import Algorithms.MDP.MDP
 import qualified Algorithms.MDP.DiscountedValueIteration as D-- (relativeValueIterate)
 
-relativeValueIterate :: (Ord t, Fractional t, Show t, Show a, Show b) =>
+relativeValueIterate :: (Ord t, Fractional t) =>
                         MDP a b t
                      -> t
                      -> State
@@ -14,18 +12,6 @@ relativeValueIterate :: (Ord t, Fractional t, Show t, Show a, Show b) =>
                      -> CFBounds a b t
 relativeValueIterate mdp tau (State distinguished) (CFBounds h _ _) =
   let
-    -- th = D.valueIterate mdp h
-    -- (_, _, distinguishedCost) = th V.! distinguished
-    -- (_, _, distinguishedCost') = h V.! distinguished
-
-    -- merge (_, _, z) (s, ac, z') = (s, ac, (1 - tau) * z + z' - distinguishedCost)
-
-    -- (lb, ub) = (V.minimum diffs, V.maximum diffs)
-    --   where
-    --     diffs = V.zipWith (\(_, _, a) (_, _, b) -> a - b + distinguishedCost) th h
-    --     --diffs = V.zipWith (\(_, _, a) (_, _, b) -> a - b + distinguishedCost) (D.valueIterate mdp h') th
-
-    -- h' = V.zipWith merge h th
     th = D.valueIterate mdp h
     (_, _, distinguishedCost) = th V.! distinguished
     h' = V.map (\(s, ac, z) -> (s, ac, z - distinguishedCost)) th
@@ -36,9 +22,9 @@ relativeValueIterate mdp tau (State distinguished) (CFBounds h _ _) =
   in
     CFBounds h' lb ub
 
--- relativeValueIteration :: (Show a, Show b, Show t, Ord t, Fractional t) =>
---                           MDP a b t 
---                        -> [CFBounds a b t]
+relativeValueIteration :: (Ord t, Fractional t, Read t) =>
+                          MDP a b t 
+                       -> [CFBounds a b t]
 relativeValueIteration mdp =
   let
     states' = _states' mdp
@@ -49,7 +35,6 @@ relativeValueIteration mdp =
     selfTransProb' a i = tau * (selfTransProb a i) + (1 - tau)
     trans  = _trans mdp
     update a s v = V.imap (\i z -> tau * z + if i == s then (1 - tau) else 0) v
-    --update a s v = v V.// [(s, selfTransProb' a s)]
 
     trans' = V.imap (\a vv -> V.imap (\s v -> update a s v) vv) trans
 
@@ -59,4 +44,4 @@ relativeValueIteration mdp =
     zero = CFBounds zeroV (read "-Infinity") (read "Infinity")
     distinguished = V.head states'
   in
-    trace (show trans') $ iterate (relativeValueIterate mdp' tau distinguished) zero
+    iterate (relativeValueIterate mdp' tau distinguished) zero

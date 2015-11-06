@@ -107,3 +107,56 @@ uniformize ctmdc = let
   discount' = (1 / tau) / (1 / tau + discount)
 
   in mkMDP states actions trans' costs' actionSet discount'
+
+data CTMDP' a b t = CTMDP'
+                    { _states     :: V.Vector a
+                    , _actions    :: V.Vector b
+                    , _states'    :: V.Vector State
+                    , _actions'   :: V.Vector Action
+                    , _fixedCosts :: V.Vector (V.Vector t)
+                    , _rateCosts  :: V.Vector (V.Vector t)
+                    , _rates      :: V.Vector (V.Vector t)
+                    , _trans      :: V.Vector (V.Vector (V.Vector t))
+                    , _discount   :: t
+                    , _actionSet  :: V.Vector (V.Vector Action)
+                    }
+
+uniformize' :: CTMDP' a b t -> MDP a b t
+uniformize' ctmdc =
+  let
+    states     = _states ctmdc
+    actions    = _actions ctmdc
+    states'    = _states' ctmdc
+    actions'   = _actions' ctmdc
+    trans      = _transitions ctmdc
+    rateCosts  = _rateCosts ctmdc
+    fixedCosts = _fixedCosts ctmdc
+    rates      = _rates ctmdc
+    actionSet  = _actionSet ctmdc
+    discount   = _discount ctmdc
+    
+    c = maximum [ (1 - trans V.! action V.! s V.! s) * (rates V.! action V.! s)
+                | s <- states, action <- actionSet V.! s]
+
+    tau = 1 / c
+
+    update a s v = V.imap (\t z -> newP t z) v
+      where
+        newP t z = if s == t
+                   then 1 - coef * (1 - z)
+                   else coef * z
+        coef = tau * (rates V.! a V.! s)
+                             
+    trans' = V.imap (\a vv -> V.imap (\s v -> update a s v) vv) trans
+
+    lumpedCost ac i = f + rc / r
+      where
+        f  = fixedCosts V.! ac V.! i
+        rc = rateCosts V.! ac V.! i
+        r  = rates V.! ac V.! i
+
+    costs' action i = (lumpedCost action i) * (discount + rates action i) / (discount + 1 / tau)
+
+    discount' = (1 / tau) / (1 / tau + discount)
+  in
+    MDP states actions states' actions' costs' trans' discount' actionSet

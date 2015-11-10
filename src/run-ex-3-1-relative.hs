@@ -6,7 +6,7 @@ import Algorithms.MDP.DiscountedValueIteration
 import qualified Data.Vector as V
 
 converging :: Double 
-           -> (CF States Controls Double, CF States Controls Double) 
+           -> (CF State Control Double, CF State Control Double) 
            -> Bool
 converging tol (cf, cf') = abs (x - y) > tol
   where

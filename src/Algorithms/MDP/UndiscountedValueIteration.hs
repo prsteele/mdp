@@ -1,8 +1,10 @@
 module Algorithms.MDP.UndiscountedValueIteration where
 
 import qualified Data.Vector as V
+
 import Algorithms.MDP.MDP
-import qualified Algorithms.MDP.DiscountedValueIteration as D-- (relativeValueIterate)
+import Algorithms.MDP.Internal
+import qualified Algorithms.MDP.DiscountedValueIteration as D
 
 relativeValueIterate :: (Ord t, Fractional t) =>
                         MDP a b t

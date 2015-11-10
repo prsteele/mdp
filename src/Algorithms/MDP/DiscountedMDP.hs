@@ -3,6 +3,7 @@ module Algorithms.MDP.DiscountedMDP where
 import qualified Data.Vector as V
 
 import Algorithms.MDP.MDP
+import Algorithms.MDP.Internal
 
 mkDiscountedMDP :: (Eq b) =>
              [a]                -- ^ The state space

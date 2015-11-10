@@ -6,6 +6,8 @@
 -- discounted and undiscounted.
 module Algorithms.MDP.MDP where
 
+import Algorithms.MDP.Internal
+
 import Control.Monad
 import qualified Data.Vector as V
 
@@ -24,14 +26,14 @@ type ActionSet a b = a -> [b]
 -- that state.
 type CF a b t = V.Vector (a, b, t)
 
-cost :: (Eq a) => CF a b t -> a -> Maybe t
-cost cf s =
+cost :: (Eq a) => a -> CF a b t -> Maybe t
+cost s cf =
   do
     (_, _, c) <- V.find (\(s', _, _) -> s == s') cf
     return c
 
-action :: (Eq a) => CF a b t -> a -> Maybe b
-action cf s =
+action :: (Eq a) => a -> CF a b t -> Maybe b
+action s cf =
   do
     (_, ac, _) <- V.find (\(s', _, _) -> s == s') cf
     return ac
@@ -52,14 +54,6 @@ data DifferentialCF a b t = DifferentialCF
                             { _cost :: t
                             , _h    :: CF a b t
                             }
-
--- | A state in the MDP.
-newtype State = State Int
-              deriving (Eq, Show)
-
--- | An action in the MDP.
-newtype Action = Action Int
-              deriving (Eq, Show)
 
 -- | A Markov decision process.
 --

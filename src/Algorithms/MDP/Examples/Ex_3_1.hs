@@ -2,10 +2,10 @@ module Algorithms.MDP.Examples.Ex_3_1 where
 
 import Algorithms.MDP.DiscountedMDP
 
-data States = A | B
-            deriving (Show, Ord, Eq)
-data Controls = U1 | U2
-              deriving (Show, Ord, Eq)
+data State = A | B
+           deriving (Show, Ord, Eq)
+data Control = U1 | U2
+             deriving (Show, Ord, Eq)
 
 transition U1 A A = 3 / 4
 transition U1 A B = 1 / 4

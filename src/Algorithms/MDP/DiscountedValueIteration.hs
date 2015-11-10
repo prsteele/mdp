@@ -4,6 +4,7 @@ import qualified Data.Vector as V
 import Data.List (minimumBy)
 
 import Algorithms.MDP.MDP
+import Algorithms.MDP.Internal
 
 inner :: (Num t) => V.Vector t -> V.Vector t -> t
 inner u v = V.sum (V.zipWith (*) u v)
@@ -16,8 +17,8 @@ valueIteration mdp =
   let
     states = _states mdp
     actions = _actions mdp
-    
-    zero = V.replicate (V.length states) (V.head states, V.head actions, 0)
+
+    zero = V.map (\s -> (s, V.head actions, 0)) states
   in
     iterate (valueIterate mdp) zero
 

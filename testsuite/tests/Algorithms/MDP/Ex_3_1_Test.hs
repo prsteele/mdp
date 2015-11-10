@@ -1,6 +1,10 @@
 {-# OPTIONS_GHC -F -pgmF htfpp #-}
 
-module Algorithms.MDP.ValueIterationTest where
+-- | This module tests the standard value iteration algorithm for
+-- discounted problems by comparing its iterations to known iterations
+-- from "Dynamic Programming and Optimal Control", Dimitri
+-- P. Bertsekas, p. 23.
+module Algorithms.MDP.Ex_3_1_Test where
 
 import Test.Framework
 import Data.Maybe

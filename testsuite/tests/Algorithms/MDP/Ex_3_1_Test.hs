@@ -9,14 +9,15 @@ module Algorithms.MDP.Ex_3_1_Test where
 import Test.Framework
 import Data.Maybe
 
-import Algorithms.MDP.Examples.Ex_3_1 hiding (cost)
+import Algorithms.MDP.Examples.Ex_3_1
 import Algorithms.MDP.MDP
 import Algorithms.MDP.ValueIteration
 
+almostEqual eps (x, y) | x == y    = True
+                       | otherwise = abs (x - y) <= eps
+
 iterations = take 16 (valueIteration mdp)
 
--- | From Bertsekas p.23 we have the iterations of value iterations to
--- 3 decimal places for the first 16 iterations.
 correctValuesA =
   [ 0
   , 0.5
@@ -60,8 +61,6 @@ actualValuesB = catMaybes $ map (cost B) iterations
 
 pairsA = zip actualValuesA correctValuesA
 pairsB = zip actualValuesB correctValuesB
-
-almostEqual eps (x, y) = abs (x - y) <= eps
 
 badPairsA = filter (not . almostEqual 1e-3) pairsA
 badPairsB = filter (not . almostEqual 1e-3) pairsB

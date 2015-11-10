@@ -7,7 +7,7 @@ import Data.Maybe
 
 import Algorithms.MDP.Examples.Ex_3_1 hiding (cost)
 import Algorithms.MDP.MDP
-import Algorithms.MDP.DiscountedValueIteration
+import Algorithms.MDP.ValueIteration
 
 iterations = take 16 (valueIteration mdp)
 

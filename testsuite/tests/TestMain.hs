@@ -4,6 +4,6 @@ module Main where
 
 import Test.Framework
 
-import {-@ HTF_TESTS @-} Algorithms.MDP.DiscountedValueIterationTest
+import {-@ HTF_TESTS @-} Algorithms.MDP.ValueIterationTest
 
 main = htfMain htf_importedTests

@@ -4,9 +4,9 @@ import qualified Data.Vector as V
 import Algorithms.MDP.Examples.Ex_3_1 hiding (mdp, cost)
 import Algorithms.MDP.Examples.Ex_3_2
 import Algorithms.MDP.MDP
-import Algorithms.MDP.UndiscountedValueIteration
+import Algorithms.MDP.ValueIteration
 
-iterations = relativeValueIteration mdp
+iterations = undiscountedRelativeValueIteration mdp
 pairs = zip iterations (tail iterations)
 
 -- | Takes elements from a list while each adjacent pair of elements

@@ -1,7 +1,6 @@
 import Algorithms.MDP.Examples.Ex_3_1
 import Algorithms.MDP.MDP
-import Algorithms.MDP.DiscountedMDP
-import Algorithms.MDP.DiscountedValueIteration
+import Algorithms.MDP.ValueIteration
 
 import qualified Data.Vector as V
 

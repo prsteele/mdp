@@ -8,7 +8,6 @@ module Algorithms.MDP.MDP where
 
 import Algorithms.MDP.Internal
 
-import Control.Monad
 import qualified Data.Vector as V
 
 -- | A type representing an action- and state-dependent probablity
@@ -81,7 +80,7 @@ mkDiscountedMDP :: (Eq b) =>
           -> ActionSet a b      -- ^ The state-dependent actions
           -> t                  -- ^ The discount factor
           -> MDP a b t          -- ^ The resulting DiscountedMDP
-mkDiscountedMDP states actions trans cost actionSet discount =
+mkDiscountedMDP states actions trans costs actionSet discount =
   let
     _states      = V.fromList states
     _actions     = V.fromList actions
@@ -89,7 +88,7 @@ mkDiscountedMDP states actions trans cost actionSet discount =
     _actions'    = V.fromList (map Action [0..length actions - 1])
     mkProbAS a s = V.fromList $ map (trans a s) states
     mkProbA a    = V.fromList $ map (mkProbAS a) states
-    mkCostA a    = V.fromList $ map (cost a) states
+    mkCostA a    = V.fromList $ map (costs a) states
 
     _costs = V.fromList $ map mkCostA actions
     _trans = V.fromList $ map mkProbA actions
@@ -119,8 +118,10 @@ mkUndiscountedMDP :: (Eq b, Num t) =>
                   -> Costs a b t        -- ^ The action-dependent costs
                   -> ActionSet a b      -- ^ The state-dependent actions
                   -> MDP a b t          -- ^ The resulting DiscountedMDP
-mkUndiscountedMDP states actions trans cost actionSet =
-  mkDiscountedMDP states actions trans cost actionSet 1
+mkUndiscountedMDP states actions trans costs actionSet =
+  mkDiscountedMDP states actions trans costs actionSet 1
+
+type Foo a b t = MDP a b t
 
 -- -- | Verifies that a 'MDP' has fully stochastic transition
 -- -- probabilities.

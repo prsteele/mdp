@@ -105,14 +105,14 @@ uniformize ctmdc =
     rescaleProb ac s v = V.imap (\t z -> newP t z) v
       where
         newP t z = if s == t
-                   then (nu - r + z * r) / (discount + nu)
-                   else r * z / (discount + nu)
+                   then (nu - r + z * r) / (beta + nu)
+                   else r * z / (beta + nu)
         r = rates V.! ac V.! s
                              
     trans' = V.imap (\a vv -> V.imap (\s v -> rescaleProb a s v) vv) trans
 
     -- We create costs that combine fixed and rate costs
-    costFor (Action ac) (State s) = ((beta + r) * f + rc) / (beta + nu)
+    costFor (Action ac) (State s) = nu * ((beta + r) * f + rc) / (beta + nu)
       where
         f  = fixedCosts V.! ac V.! s
         rc = rateCosts V.! ac V.! s

@@ -9,6 +9,7 @@ module Algorithms.MDP.MDP where
 import Algorithms.MDP.Internal
 
 import qualified Data.Vector as V
+import Data.Maybe
 
 -- | A type representing an action- and state-dependent probablity
 -- vector.
@@ -25,17 +26,29 @@ type ActionSet a b = a -> [b]
 -- that state.
 type CF a b t = V.Vector (a, b, t)
 
-cost :: (Eq a) => a -> CF a b t -> Maybe t
-cost s cf =
-  do
-    (_, _, c) <- V.find (\(s', _, _) -> s == s') cf
-    return c
+-- | Get the cost associated with a state.
+--
+-- This function is only defined over the state values passed in to
+-- the original MDP.
+cost :: (Eq a) => a -> CF a b t -> t
+cost s cf = 
+  let
+    (_, _, c) = fromMaybe err (V.find (\(s', _, _) -> s == s') cf)
+    err = error "Unknown state in function \"cost\""
+  in
+    c
 
-action :: (Eq a) => a -> CF a b t -> Maybe b
+-- | Get the action associated with a state.
+--
+-- This function is only defined over the state values passed in to
+-- the original MDP.
+action :: (Eq a) => a -> CF a b t -> b
 action s cf =
-  do
-    (_, ac, _) <- V.find (\(s', _, _) -> s == s') cf
-    return ac
+  let
+    (_, ac, _) = fromMaybe err (V.find (\(s', _, _) -> s == s') cf)
+    err = error "Unknown state in function \"action\""
+  in
+    ac
 
 -- | A cost function with error bounds. The cost in a (state, action,
 -- cost) triple is guaranteed to be in the range [cost + lb, cost + ub]

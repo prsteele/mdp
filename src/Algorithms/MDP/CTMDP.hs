@@ -92,10 +92,7 @@ uniformize ctmdc =
     selfTrans ac s = trans V.! ac V.! s V.! s
 
     -- The fastest transition rate
-    nu = maximum [ (1 - selfTrans ac s) * (rates V.! ac V.! s)
-                 | State s <- V.toList states'
-                 , Action ac <- V.toList (actionSet V.! s)
-                 ]
+    nu = maximum (fmap maximum rates)
 
     -- The mean transition time of the fastest transition
     tau = 1 / nu
@@ -115,7 +112,7 @@ uniformize ctmdc =
     trans' = V.imap (\a vv -> V.imap (\s v -> rescaleProb a s v) vv) trans
 
     -- We create costs that combine fixed and rate costs
-    costFor (Action ac) (State s) = ((beta + r) * f  + rc) / (beta + nu)
+    costFor (Action ac) (State s) = ((beta + r) * f + rc) / (beta + nu)
       where
         f  = fixedCosts V.! ac V.! s
         rc = rateCosts V.! ac V.! s

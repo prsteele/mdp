@@ -86,7 +86,6 @@ relativeValueIterate mdp (CFBounds cf _ _) =
     , _ub = scale * ub
     }
 
-
 undiscountedRVI :: (Ord t, Fractional t) =>
                                     MDP a b t
                                  -> State

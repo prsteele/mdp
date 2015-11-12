@@ -37,9 +37,12 @@ choiceFor :: (Ord t, Num t) =>
           -> (a, b, t) -- ^ The choice of action and associated cost
 choiceFor mdp cf (State st) s =
   let
+
+    actions = V.fromList [(_actions mdp) V.! ac' | Action ac' <- V.toList ((_actionSet mdp) V.! st)]
+    
     cmp (_, x) (_, y) = compare x y
     costs = V.map (costForAction mdp cf (State st)) (_actionSet mdp V.! st)
-    pairs = V.zip (_actions mdp) costs
+    pairs = V.zip actions costs
     (ac, c) = V.minimumBy cmp pairs
   in
     (s, ac, c)

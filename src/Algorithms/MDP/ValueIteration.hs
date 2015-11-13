@@ -89,21 +89,21 @@ relativeValueIterate mdp (CFBounds cf _ _) =
     }
 
 undiscountedRVI :: (Ord t, Fractional t) =>
-                                    MDP a b t
-                                 -> Int
-                                 -> CFBounds a b t
-                                 -> CFBounds a b t
+                   MDP a b t
+                -> Int
+                -> CFBounds a b t
+                -> CFBounds a b t
 undiscountedRVI mdp distinguished (CFBounds h _ _) =
   let
     th = valueIterate mdp h
     (_, _, distinguishedCost) = th V.! distinguished
-    h' = V.map (\(s, ac, z) -> (s, ac, z - distinguishedCost)) th
+    th' = V.map (\(s, ac, z) -> (s, ac, z - distinguishedCost)) th
 
     (lb, ub) = (V.minimum diffs, V.maximum diffs)
       where
         diffs = V.zipWith (\(_, _, a) (_, _, b) -> a - b) th h
   in
-    CFBounds h' lb ub
+    CFBounds th' lb ub
 
 undiscountedRelativeValueIteration :: (Ord t, Fractional t, Read t) =>
                                       MDP a b t 

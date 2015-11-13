@@ -6,8 +6,6 @@
 -- discounted and undiscounted.
 module Algorithms.MDP.MDP where
 
-import Algorithms.MDP.Internal
-
 import qualified Data.Vector as V
 import Data.Maybe
 
@@ -77,12 +75,10 @@ data DifferentialCF a b t = DifferentialCF
 data MDP a b t = MDP
                  { _states    :: V.Vector a
                  , _actions   :: V.Vector b
-                 , _states'   :: V.Vector State
-                 , _actions'  :: V.Vector Action
                  , _costs     :: V.Vector (V.Vector t)
                  , _trans     :: V.Vector (V.Vector (V.Vector t))
                  , _discount  :: t
-                 , _actionSet :: V.Vector (V.Vector Action)
+                 , _actionSet :: V.Vector (V.Vector Int)
                  }
 
 mkDiscountedMDP :: (Eq b) =>
@@ -97,8 +93,6 @@ mkDiscountedMDP states actions trans costs actionSet discount =
   let
     _states      = V.fromList states
     _actions     = V.fromList actions
-    _states'     = V.fromList (map State [0..length states - 1])
-    _actions'    = V.fromList (map Action [0..length actions - 1])
     mkProbAS a s = V.fromList $ map (trans a s) states
     mkProbA a    = V.fromList $ map (mkProbAS a) states
     mkCostA a    = V.fromList $ map (costs a) states
@@ -106,7 +100,7 @@ mkDiscountedMDP states actions trans costs actionSet discount =
     _costs = V.fromList $ map mkCostA actions
     _trans = V.fromList $ map mkProbA actions
 
-    actionPairs   = zip (map Action [0..]) actions
+    actionPairs   = zip [0..] actions
     actionSet' st = V.fromList $ map fst $ filter ((`elem` acs) . snd) actionPairs
       where
         acs = actionSet st
@@ -116,8 +110,6 @@ mkDiscountedMDP states actions trans costs actionSet discount =
     MDP
     { _states    = _states
     , _actions   = _actions
-    , _states'   = _states'
-    , _actions'  = _actions'
     , _costs     = _costs
     , _trans     = _trans
     , _discount  = discount
@@ -133,8 +125,6 @@ mkUndiscountedMDP :: (Eq b, Num t) =>
                   -> MDP a b t          -- ^ The resulting DiscountedMDP
 mkUndiscountedMDP states actions trans costs actionSet =
   mkDiscountedMDP states actions trans costs actionSet 1
-
-type Foo a b t = MDP a b t
 
 -- -- | Verifies that a 'MDP' has fully stochastic transition
 -- -- probabilities.

@@ -5,10 +5,6 @@ module Algorithms.MDP.CTMDP where
 
 import qualified Data.Vector as V
 
-import Algorithms.MDP.Internal
---import Algorithms.MDP.MDP hiding (MDP (..))
---import qualified Algorithms.MDP.MDP as MDP
-
 import Algorithms.MDP.MDP hiding (MDP (..))
 import Algorithms.MDP.MDP (MDP(MDP))
 
@@ -28,8 +24,8 @@ mkCTMDP states actions trans rates fixedCost rateCost actionSet discount =
   let
     _states      = V.fromList states
     _actions     = V.fromList actions
-    _states'     = V.fromList (map State [0..length states - 1])
-    _actions'    = V.fromList (map Action [0..length actions - 1])
+    _states'     = V.fromList [0..length states - 1]
+    _actions'    = V.fromList [0..length actions - 1]
 
     mkCostVecFor cf ac = V.fromList $ map (cf ac) states
     _fixedCosts = V.fromList $ map (mkCostVecFor fixedCost) actions
@@ -42,7 +38,7 @@ mkCTMDP states actions trans rates fixedCost rateCost actionSet discount =
     mkTransVec ac = V.fromList $ map (rates ac) states
     _rates = V.fromList $ map mkTransVec actions
 
-    actionPairs   = zip (map Action [0..]) actions
+    actionPairs   = zip [0..] actions
     actionSet' st = V.fromList $ map fst $ filter ((`elem` acs) . snd) actionPairs
       where
         acs = actionSet st
@@ -52,8 +48,6 @@ mkCTMDP states actions trans rates fixedCost rateCost actionSet discount =
     CTMDP
     { _states     = _states
     , _actions    = _actions
-    , _states'    = _states'
-    , _actions'   = _actions'
     , _fixedCosts = _fixedCosts
     , _rateCosts  = _rateCosts
     , _rates      = _rates
@@ -65,14 +59,12 @@ mkCTMDP states actions trans rates fixedCost rateCost actionSet discount =
 data CTMDP a b t = CTMDP
                    { _states     :: V.Vector a
                    , _actions    :: V.Vector b
-                   , _states'    :: V.Vector State
-                   , _actions'   :: V.Vector Action
                    , _fixedCosts :: V.Vector (V.Vector t)
                    , _rateCosts  :: V.Vector (V.Vector t)
                    , _rates      :: V.Vector (V.Vector t)
                    , _trans      :: V.Vector (V.Vector (V.Vector t))
                    , _discount   :: t
-                   , _actionSet  :: V.Vector (V.Vector Action)
+                   , _actionSet  :: V.Vector (V.Vector Int)
                    }
 
 uniformize :: (Ord t, Fractional t) => CTMDP a b t -> MDP a b t
@@ -80,8 +72,6 @@ uniformize ctmdc =
   let
     states     = _states ctmdc
     actions    = _actions ctmdc
-    states'    = _states' ctmdc
-    actions'   = _actions' ctmdc
     trans      = _trans ctmdc
     rateCosts  = _rateCosts ctmdc
     fixedCosts = _fixedCosts ctmdc
@@ -89,7 +79,8 @@ uniformize ctmdc =
     actionSet  = _actionSet ctmdc
     discount   = _discount ctmdc
 
-    selfTrans ac s = trans V.! ac V.! s V.! s
+    nStates = length states
+    nActions = length actions
 
     -- The fastest transition rate
     nu = maximum (fmap maximum rates)
@@ -112,14 +103,14 @@ uniformize ctmdc =
     trans' = V.imap (\a vv -> V.imap (\s v -> rescaleProb a s v) vv) trans
 
     -- We create costs that combine fixed and rate costs
-    costFor (Action ac) (State s) = nu * ((beta + r) * f + rc) / (beta + nu)
+    costFor ac s = nu * ((beta + r) * f + rc) / (beta + nu)
       where
         f  = fixedCosts V.! ac V.! s
         rc = rateCosts V.! ac V.! s
         r  = rates V.! ac V.! s
 
-    costs' = V.map (\ac -> V.map (costFor ac) states') actions'
+    costs' = V.generate nActions (\ac -> V.generate nStates (costFor ac))
 
     discount' = (1 / tau) / (1 / tau + discount)
   in
-    MDP states actions states' actions' costs' trans' discount' actionSet
+    MDP states actions costs' trans' discount' actionSet

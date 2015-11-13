@@ -126,56 +126,52 @@ mkUndiscountedMDP :: (Eq b, Num t) =>
 mkUndiscountedMDP states actions trans costs actionSet =
   mkDiscountedMDP states actions trans costs actionSet 1
 
--- -- | Verifies that a 'MDP' has fully stochastic transition
--- -- probabilities.
--- --
--- -- For each state and allowable action in that state, the sum of
--- -- transition probabilities to each other state must sum to 1 (within
--- -- the given tolerance), and all transition probabilities must be
--- -- nonnegative.
--- isStochastic :: (Ord t, Num t) => MDP a b t -> t -> Bool
--- isStochastic mdp tol = null $ nonStochastic mdp tol
+data MDPError a b t = MDPError
+                      { _negativeProbability    :: [(b, a, a, t)]
+                      , _lessThanOneProbability :: [(b, a, t)]
+                      }
+                    deriving (Show)
 
--- -- | Returns the non-stochastic (action, state) pairs in an 'MDP'.
--- --
--- -- An (action, state) pair is not stochastic if any transitions out of
--- -- the state occur with negative probability, or if the total
--- -- probability all possible transitions is not 1 (within the given
--- -- tolerance).
--- nonStochastic :: (Ord t, Num t) => MDP a b t -> t -> [(b, a, t)]
--- nonStochastic mdp tol =
---   let
---     stateSpace = unStates mdp
---     actionSet = unActionSet mdp
---     trans = unTransition mdp
---     isStochastic' (action, state) = all (>= 0) v && abs (1 - sum v) <= tol
---       where
---         v = map (trans action state) stateSpace
+-- | Returns the non-stochastic (action, state) pairs in an 'MDP'.
+--
+-- An (action, state) pair is not stochastic if any transitions out of
+-- the state occur with negative probability, or if the total
+-- probability all possible transitions is not 1 (within the given
+-- tolerance).
 
---     totalProb action state = sum $ map (trans action state) stateSpace
+-- | Verifies that the MDP is stochastic.
+--
+-- An MDP is stochastic if all transition probabilities are
+-- non-negative, and the total sum of transitions out of a state under
+-- a legal action sum to one.
+--
+-- We verify sums to within the given tolerance.
+verifyStochastic :: (Ord t, Num t) => MDP a b t -> t -> Either (MDPError a b t) ()
+verifyStochastic mdp tol =
+  let
+    states  = V.toList . V.indexed . _states  $ mdp
+    actions = V.toList . V.indexed . _actions $ mdp
+    trans   = _trans mdp
+    actionSet = _actionSet mdp
 
---     pairs = [(action, state) | state <- stateSpace, action <- actionSet state]
-
---     f (action, state) = (action, state, totalProb action state)
-
---   in map f (filter (not . isStochastic') pairs)
-
--- -- | Returns True if the two 'CostFunction's have a large difference
--- -- between them.
--- --
--- -- We compute the 2-norm of the difference of the two functions, and
--- -- return True if the norm is less than the given tolerance.
--- --
--- -- This function can be applied to a list of cost functions to
--- -- determine when the cost functions have converged to within some
--- -- tolerance, e.g.
--- --
--- -- > costFunctions = valueIteration mdp
--- -- > pairs = zip costFunctions (tail costFunctions)
--- -- > solution = head $ dropWhile (uncurry (converging mdp 0.01)) pairs
--- converging :: (Ord t, Floating t) => MDP a b t -> t -> CostFunction a b t -> CostFunction a b t -> Bool
--- converging mdp tol cf cf' =
---   let
---     stateSpace = unStates mdp
---     norm = sum [(snd (cf s) - snd (cf' s)) ** 2 | s <- stateSpace]
---   in norm > tol
+    nonNegTriples = [(ac, s, t, trans V.! acIndex V.! sIndex V.! tIndex)
+                    | (acIndex, ac) <- actions
+                    , (sIndex, s) <- states
+                    , (tIndex, t) <- states
+                    , acIndex `V.elem` (actionSet V.! sIndex)
+                    , trans V.! acIndex V.! sIndex V.! tIndex < 0]
+                    
+    totalProb acIndex sIndex = sum (trans V.! acIndex V.! sIndex)
+    badSumPairs = [(ac, s, totalProb acIndex sIndex) 
+                  | (acIndex, ac) <- actions
+                  , (sIndex, s) <- states
+                  , acIndex `V.elem` (actionSet V.! sIndex)
+                  , abs (1 - totalProb acIndex sIndex) > tol
+                  ]
+  in
+    case (null nonNegTriples, null badSumPairs) of
+    (True,  True) -> Right ()
+    _             -> Left MDPError
+                     { _negativeProbability    = nonNegTriples
+                     , _lessThanOneProbability = badSumPairs
+                     }

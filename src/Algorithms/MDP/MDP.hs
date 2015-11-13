@@ -127,8 +127,8 @@ mkUndiscountedMDP states actions trans costs actionSet =
   mkDiscountedMDP states actions trans costs actionSet 1
 
 data MDPError a b t = MDPError
-                      { _negativeProbability    :: [(b, a, a, t)]
-                      , _lessThanOneProbability :: [(b, a, t)]
+                      { _negativeProbability :: [(b, a, a, t)]
+                      , _notOneProbability   :: [(b, a, t)]
                       }
                     deriving (Show)
 
@@ -172,6 +172,6 @@ verifyStochastic mdp tol =
     case (null nonNegTriples, null badSumPairs) of
     (True,  True) -> Right ()
     _             -> Left MDPError
-                     { _negativeProbability    = nonNegTriples
-                     , _lessThanOneProbability = badSumPairs
+                     { _negativeProbability = nonNegTriples
+                     , _notOneProbability   = badSumPairs
                      }

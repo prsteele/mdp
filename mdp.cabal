@@ -49,6 +49,11 @@ executable ex-3-2
   build-depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*
   hs-source-dirs:      src
 
+executable mm1
+  main-is:             run-mm1.hs
+  build-depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*
+  hs-source-dirs:      src
+  
 -- executable line-clients
 --   main-is:             run-line-clients.hs
 --   build-depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*

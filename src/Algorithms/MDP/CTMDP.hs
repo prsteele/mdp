@@ -5,8 +5,8 @@ module Algorithms.MDP.CTMDP where
 
 import qualified Data.Vector as V
 
-import Algorithms.MDP.MDP hiding (MDP (..))
-import Algorithms.MDP.MDP (MDP(MDP))
+import           Algorithms.MDP.MDP (MDP(MDP))
+import           Algorithms.MDP.MDP hiding (MDP (..))
 
 type Rates a b t = b -> a -> t
 
@@ -85,9 +85,6 @@ uniformize ctmdc =
     -- The fastest transition rate
     nu = maximum (fmap maximum rates)
 
-    -- The mean transition time of the fastest transition
-    tau = 1 / nu
-
     -- The discount factor for the continuous-time problem
     beta = nu * (1 / discount - 1)
 
@@ -103,7 +100,7 @@ uniformize ctmdc =
     trans' = V.imap (\a vv -> V.imap (\s v -> rescaleProb a s v) vv) trans
 
     -- We create costs that combine fixed and rate costs
-    costFor ac s = nu * ((beta + r) * f + rc) / (beta + nu)
+    costFor ac s = ((beta + r) * f + rc) / (beta + nu)
       where
         f  = fixedCosts V.! ac V.! s
         rc = rateCosts V.! ac V.! s
@@ -111,6 +108,6 @@ uniformize ctmdc =
 
     costs' = V.generate nActions (\ac -> V.generate nStates (costFor ac))
 
-    discount' = (1 / tau) / (1 / tau + discount)
+    discount' = nu / (beta + nu)
   in
     MDP states actions costs' trans' discount' actionSet

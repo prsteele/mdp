@@ -76,7 +76,7 @@ scenario1 = Scenario
             { _arrivalRate  = 3
             , _serviceRates = [2, 4, 8]
             , _serviceCosts = [9, 13, 21]
-            , _holdingCosts = const 5
+            , _holdingCosts = \i -> fromIntegral i--const 5
             , _maxWaiting   = 48
             }
 

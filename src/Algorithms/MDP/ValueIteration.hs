@@ -97,11 +97,13 @@ undiscountedRVI mdp distinguished (CFBounds h _ _) =
   let
     th = valueIterate mdp h
     (_, _, distinguishedCost) = th V.! distinguished
+
     th' = V.map (\(s, ac, z) -> (s, ac, z - distinguishedCost)) th
 
     (lb, ub) = (V.minimum diffs, V.maximum diffs)
       where
         diffs = V.zipWith (\(_, _, a) (_, _, b) -> a - b) th h
+
   in
     CFBounds th' lb ub
 

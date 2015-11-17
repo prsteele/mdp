@@ -53,6 +53,7 @@ executable mm1
   main-is:             run-mm1.hs
   build-depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*
   hs-source-dirs:      src
+  ghc-options:         -Wall
   
 -- executable line-clients
 --   main-is:             run-line-clients.hs

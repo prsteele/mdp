@@ -100,7 +100,7 @@ uniformize ctmdc =
     trans' = V.imap (\a vv -> V.imap (\s v -> rescaleProb a s v) vv) trans
 
     -- We create costs that combine fixed and rate costs
-    costFor ac s = ((beta + r) * f + rc) / (beta + nu)
+    costFor ac s = nu * ((beta + r) * f + rc) / (beta + nu)
       where
         f  = fixedCosts V.! ac V.! s
         rc = rateCosts V.! ac V.! s

@@ -56,6 +56,12 @@ data CFBounds a b t = CFBounds
                       , _ub :: t
                       }
 
+-- | Compute the optimality gap associated with a CFBounds.
+--
+-- This error is absolute, not relative.
+optimalityGap :: (Num t) => CFBounds a b t -> t
+optimalityGap (CFBounds _ lb ub) = ub - lb
+
 -- | A DifferentialCF is an estimate of the long-run optimal average
 -- cost per stage along with a differential cost vector describing the
 -- deviation of each cost of a given state from the long-run average

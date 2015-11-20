@@ -7,13 +7,13 @@
 module Algorithms.MDP.Ex_3_1_RelativeTest where
 
 import Test.Framework
-import Data.Maybe
 
 import Algorithms.MDP.Ex_3_1_Test (correctValuesA, correctValuesB, almostEqual)
 import Algorithms.MDP.Examples.Ex_3_1
 import Algorithms.MDP.MDP
 import Algorithms.MDP.ValueIteration
 
+lowerValuesA :: [Double]
 lowerValuesA =
   [ read "-Infinity"
   , 5.000
@@ -33,6 +33,7 @@ lowerValuesA =
   , 7.328
   ]
 
+upperValuesA :: [Double]
 upperValuesA =
   [ read "Infinity"
   , 9.500
@@ -52,6 +53,7 @@ upperValuesA =
   , 7.328
   ]
 
+lowerValuesB :: [Double]
 lowerValuesB =
   [ read "-Infinity"
   , 5.500
@@ -71,6 +73,7 @@ lowerValuesB =
   , 7.672
   ]
 
+upperValuesB :: [Double]
 upperValuesB =
   [ read "Infinity"
   , 10.000
@@ -92,16 +95,16 @@ upperValuesB =
 
 iterations = take 16 (relativeValueIteration mdp)
 
-lower s (CFBounds cf lb _)  = pure (+ lb) <*> cost s cf
-upper s (CFBounds cf _  ub) = pure (+ ub) <*> cost s cf
+lower s (CFBounds cf lb _)  = lb + cost s cf
+upper s (CFBounds cf _  ub) = ub + cost s cf
 
-actualValuesA = catMaybes $ map (cost A . _CF) iterations
-actualValuesB = catMaybes $ map (cost B . _CF) iterations
+actualValuesA = map (cost A . _CF) iterations
+actualValuesB = map (cost B . _CF) iterations
 
-actualLowerA = catMaybes $ map (lower A) iterations
-actualUpperA = catMaybes $ map (upper A) iterations
-actualLowerB = catMaybes $ map (lower B) iterations
-actualUpperB = catMaybes $ map (upper B) iterations
+actualLowerA = map (lower A) iterations
+actualUpperA = map (upper A) iterations
+actualLowerB = map (lower B) iterations
+actualUpperB = map (upper B) iterations
 
 badActualA = filter (not . almostEqual 1e-3) $ zip actualValuesA correctValuesA
 badActualB = filter (not . almostEqual 1e-3) $ zip actualValuesB correctValuesB

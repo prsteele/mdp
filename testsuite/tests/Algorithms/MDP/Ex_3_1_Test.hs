@@ -7,7 +7,6 @@
 module Algorithms.MDP.Ex_3_1_Test where
 
 import Test.Framework
-import Data.Maybe
 
 import Algorithms.MDP.Examples.Ex_3_1
 import Algorithms.MDP.MDP
@@ -56,8 +55,8 @@ correctValuesB =
   , 6.128
   ]
 
-actualValuesA = catMaybes $ map (cost A) iterations
-actualValuesB = catMaybes $ map (cost B) iterations
+actualValuesA = map (cost A) iterations
+actualValuesB = map (cost B) iterations
 
 pairsA = zip actualValuesA correctValuesA
 pairsB = zip actualValuesB correctValuesB

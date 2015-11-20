@@ -13,6 +13,7 @@ data Scenario = Scenario
                 , _serviceCosts :: [Double]
                 , _holdingCosts :: Int -> Double
                 , _maxWaiting   :: Int
+                , _scenarioCost :: Double
                 }
 
 newtype State = State Int
@@ -78,6 +79,7 @@ scenario1 = Scenario
             , _serviceCosts = [9, 13, 21]
             , _holdingCosts = \i -> fromIntegral i--const 5
             , _maxWaiting   = 48
+            , _scenarioCost = 8.475
             }
 
 scenario2 = Scenario
@@ -86,6 +88,7 @@ scenario2 = Scenario
             , _serviceCosts = [1, 50, 500]
             , _holdingCosts = \i -> fromIntegral i
             , _maxWaiting   = 84
+            , _scenarioCost = 21.091
             }
 
 scenario3 = Scenario
@@ -94,4 +97,50 @@ scenario3 = Scenario
             , _serviceCosts = [1, 50, 150]
             , _holdingCosts = \i -> fromIntegral i
             , _maxWaiting   = 84
+            , _scenarioCost = 21.091
+            }
+
+scenario4 = Scenario
+            { _arrivalRate  = 2.0
+            , _serviceRates = [1, 4, 7]
+            , _serviceCosts = [1, 50, 100]
+            , _holdingCosts = \i -> fromIntegral i
+            , _maxWaiting   = 84
+            , _scenarioCost = 21.971
+            }
+
+scenario5 = Scenario
+            { _arrivalRate  = 2.0
+            , _serviceRates = [5.0, 5.5, 5.8]
+            , _serviceCosts = [0, 10, 100]
+            , _holdingCosts = \i -> fromIntegral i
+            , _maxWaiting   = 84
+            , _scenarioCost = 17.043
+            }
+
+scenario6 = Scenario
+            { _arrivalRate  = 5.0
+            , _serviceRates = [5.1, 5.3, 6.0]
+            , _serviceCosts = [0, 10, 25]
+            , _holdingCosts = \i -> fromIntegral i
+            , _maxWaiting   = 84
+            , _scenarioCost = 15.193
+            }
+
+scenario7 = Scenario
+            { _arrivalRate  = 10.0
+            , _serviceRates = [10.2, 10.6, 12]
+            , _serviceCosts = [0, 10, 25]
+            , _holdingCosts = \i -> fromIntegral i
+            , _maxWaiting   = 84
+            , _scenarioCost = 15.193
+            }
+
+scenario8 = Scenario
+            { _arrivalRate  = 20.0
+            , _serviceRates = [24, 27, 30]
+            , _serviceCosts = [1, 1.5, 5.0]
+            , _holdingCosts = \i -> fromIntegral i
+            , _maxWaiting   = 84
+            , _scenarioCost = 3.902
             }

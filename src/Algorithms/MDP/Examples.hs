@@ -83,9 +83,7 @@ iterations = undiscountedRelativeValueIteration mdp
 We can compute cost estimates in the same fashion as above.
 
 @
-estimate state (CFBounds cf lb ub) = (z + lb, z + ub)
-  where
-    z = cost state cf
+estimate state (CFBounds cf lb ub) = (lb, ub)
 
 estimates :: [(Double, Double)]
 estimates = map (estimate A) (take 10 iterations)
@@ -127,9 +125,7 @@ function to compute cost estimates.
 iterations :: [CFBounds State Action Double]
 iterations = undiscountedRelativeValueIteration mdp
 
-estimate state (CFBounds cf lb ub) = (z + lb, z + ub)
-  where
-    z = cost state cf
+estimate state (CFBounds _ lb ub) = (lb, ub)
 
 estimates :: [(Double, Double)]
 estimates = map (estimate A) (take 10 iterations)

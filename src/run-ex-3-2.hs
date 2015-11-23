@@ -20,5 +20,5 @@ distinguished = A
 showAll (CFBounds h lb ub) = unwords [show h, show lb, show ub]
 
 main = do
-  mapM_ (putStrLn . showAll) $ take 20 iterations
+  mapM_ (putStrLn . showAll) $ take 11 iterations
 

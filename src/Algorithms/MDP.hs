@@ -16,6 +16,9 @@
 -- * \"Stochastic Dynamic Programming and the Control of Queueing
 --   Systems\", by Linn I. Sennott, A Wiley- Interscience Publication,
 --   New York.
+--
+-- The module "Algorithms.MDP.Examples" contains implementations of
+-- several example problems from these texts.
 module Algorithms.MDP
        ( -- * Markov decision processes
          MDP (..)

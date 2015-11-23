@@ -23,7 +23,9 @@ cabal-version:       >=1.8
 Library
   Build-Depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*
   Exposed-modules:     Algorithms.MDP, Algorithms.MDP.ValueIteration,
-                       Algorithms.MDP.CTMDP
+                       Algorithms.MDP.CTMDP, Algorithms.MDP.Examples.Ex_3_1,
+                       Algorithms.MDP.Examples.Ex_3_2, Algorithms.MDP.Examples.MM1,
+                       Algorithms.MDP.Examples
   ghc-options:         -Wall -fforce-recomp
   hs-source-dirs:      src
 

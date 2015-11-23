@@ -15,7 +15,7 @@ function.
 import Algorithms.MDP.Examples.Ex_3_1
 import Algorithms.MDP.ValueIteration
 
-iterations :: [CF State Action Double]
+iterations :: [CF State Control Double]
 iterations = valueIteration mdp
 @
 
@@ -41,7 +41,7 @@ Since we have already defined the problem, we do this via the
 import Algorithms.MDP.Examples.Ex_3_1
 import Algorithms.MDP.ValueIteration
 
-iterations :: [CFBounds State Action Double]
+iterations :: [CFBounds State Control Double]
 iterations = relativeValueIteration mdp
 @
 
@@ -76,7 +76,7 @@ undiscounted MDP. For this we use the
 import Algorithms.MDP.Examples.Ex_3_2
 import Algorithms.MDP.ValueIteration
 
-iterations :: [CFBounds State Action Double]
+iterations :: [CFBounds State Control Double]
 iterations = undiscountedRelativeValueIteration mdp
 @
 

@@ -1,3 +1,5 @@
+-- | This module provides several flavors of the value iteration
+-- algorithm for solving MDPs.
 module Algorithms.MDP.ValueIteration
        ( -- * Value iteration algorithms
          valueIteration

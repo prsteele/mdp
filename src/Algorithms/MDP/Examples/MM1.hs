@@ -7,6 +7,7 @@ module Algorithms.MDP.Examples.MM1 where
 
 import qualified Algorithms.MDP.CTMDP as CTMDP
 
+-- | A description of an MDP.
 data Scenario = Scenario
                 { _arrivalRate  :: Double
                 , _serviceRates :: [Double]
@@ -16,13 +17,17 @@ data Scenario = Scenario
                 , _scenarioCost :: Double
                 }
 
+-- | The state space is the count of customers in the queue.
 newtype State = State Int
               deriving (Show, Eq)
-                       
+
+-- | There are a number of services we can provide each customer, and
+-- if there are no customers we do nothing.
 data Action = NullAction
             | Action Int
             deriving (Show, Eq)
 
+-- | Generate an MDP from a Scenario.
 mkInstance :: Scenario -> CTMDP.CTMDP State Action Double
 mkInstance scenario =
   let
@@ -73,6 +78,7 @@ mkInstance scenario =
   in
     CTMDP.mkCTMDP states actions trans rates fixedCost rateCost actionSet 1.0
 
+-- | A specific scenario.
 scenario1 :: Scenario
 scenario1 = Scenario
             { _arrivalRate  = 3
@@ -83,6 +89,7 @@ scenario1 = Scenario
             , _scenarioCost = 8.475
             }
 
+-- | A specific scenario.
 scenario2 :: Scenario
 scenario2 = Scenario
             { _arrivalRate  = 2.0
@@ -93,6 +100,7 @@ scenario2 = Scenario
             , _scenarioCost = 21.091
             }
             
+-- | A specific scenario.
 scenario3 :: Scenario
 scenario3 = Scenario
             { _arrivalRate  = 2.0
@@ -103,6 +111,7 @@ scenario3 = Scenario
             , _scenarioCost = 21.091
             }
 
+-- | A specific scenario.
 scenario4 :: Scenario
 scenario4 = Scenario
             { _arrivalRate  = 2.0
@@ -113,6 +122,7 @@ scenario4 = Scenario
             , _scenarioCost = 21.971
             }
 
+-- | A specific scenario.
 scenario5 :: Scenario
 scenario5 = Scenario
             { _arrivalRate  = 2.0
@@ -123,6 +133,7 @@ scenario5 = Scenario
             , _scenarioCost = 17.043
             }
 
+-- | A specific scenario.
 scenario6 :: Scenario
 scenario6 = Scenario
             { _arrivalRate  = 5.0
@@ -133,6 +144,7 @@ scenario6 = Scenario
             , _scenarioCost = 15.193
             }
 
+-- | A specific scenario.
 scenario7 :: Scenario
 scenario7 = Scenario
             { _arrivalRate  = 10.0
@@ -143,6 +155,7 @@ scenario7 = Scenario
             , _scenarioCost = 15.193
             }
 
+-- | A specific scenario.
 scenario8 :: Scenario
 scenario8 = Scenario
             { _arrivalRate  = 20.0

@@ -10,8 +10,12 @@
 -- should converge to the same value. Thus we simply ensure that the
 -- error bounds we report properly contain the solution reported by
 -- Bertsekas.
-module Algorithms.MDP.Ex_3_1_Test where
+module Algorithms.MDP.Ex_3_2_Test where
 
+import Test.Framework
+
+import Algorithms.MDP
+import Algorithms.MDP.ValueIteration
 import Algorithms.MDP.Examples.Ex_3_2
 
 value = 0.750

@@ -1,7 +1,7 @@
 import Text.Printf
 import Control.Monad
 
-import Algorithms.MDP.MDP
+import Algorithms.MDP
 import Algorithms.MDP.CTMDP
 import Algorithms.MDP.ValueIteration
 import Algorithms.MDP.Examples.MM1

@@ -22,7 +22,7 @@ cabal-version:       >=1.8
 
 Library
   Build-Depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*
-  Exposed-modules:     Algorithms.MDP.MDP, Algorithms.MDP.ValueIteration,
+  Exposed-modules:     Algorithms.MDP, Algorithms.MDP.ValueIteration,
                        Algorithms.MDP.CTMDP
   ghc-options:         -Wall -fforce-recomp
   hs-source-dirs:      src
@@ -31,12 +31,6 @@ executable ex-3-1
   main-is:             run-ex-3-1.hs
   build-depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*
   hs-source-dirs:      src
-
--- executable ex-3-1-flat
---   main-is:             run-ex-3-1-flat.hs
---   build-depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*,
---                        transformers ==0.4.2.*
---   hs-source-dirs:      src
 
 executable ex-3-1-relative
   main-is:             run-ex-3-1-relative.hs
@@ -55,17 +49,6 @@ executable mm1
   hs-source-dirs:      src
   ghc-options:         -Wall
   
--- executable line-clients
---   main-is:             run-line-clients.hs
---   build-depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*
---   hs-source-dirs:      src
-
--- test-suite TestMain
---   hs-source-dirs:     testsuite/tests/MDP, src/
---   main-is:            TestMain.hs
---   type:               exitcode-stdio-1.0
---   build-depends:      base >= 4 && < 5, HTF == 0.13.*, QuickCheck >=2.8.1, containers, HUnit, array
-
 test-suite TestMain
   hs-source-dirs:     testsuite/tests/, src/
   main-is:            TestMain.hs

@@ -9,7 +9,7 @@ module Algorithms.MDP.Ex_3_1_Test where
 import Test.Framework
 
 import Algorithms.MDP.Examples.Ex_3_1
-import Algorithms.MDP.MDP
+import Algorithms.MDP
 import Algorithms.MDP.ValueIteration
 
 almostEqual eps (x, y) | x == y    = True

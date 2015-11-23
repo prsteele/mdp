@@ -3,7 +3,7 @@ module Algorithms.MDP.Examples.LineClient where
 import Text.Printf
 import Data.List
 
-import Algorithms.MDP.MDP
+import Algorithms.MDP
 import Algorithms.MDP.UndiscountedMDP
 
 data Action = Depart | Stay

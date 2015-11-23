@@ -3,7 +3,7 @@ import qualified Data.Vector as V
 
 import Algorithms.MDP.Examples.Ex_3_1 hiding (mdp, cost)
 import Algorithms.MDP.Examples.Ex_3_2
-import Algorithms.MDP.MDP
+import Algorithms.MDP
 import Algorithms.MDP.ValueIteration
 
 iterations = undiscountedRelativeValueIteration mdp

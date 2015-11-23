@@ -5,7 +5,7 @@
 -- Systems", Linn I. Sennot,, p. 242 for details.
 module Algorithms.MDP.Examples.MM1 where
 
-import Algorithms.MDP.CTMDP
+import qualified Algorithms.MDP.CTMDP as CTMDP
 
 data Scenario = Scenario
                 { _arrivalRate  :: Double
@@ -23,7 +23,7 @@ data Action = NullAction
             | Action Int
             deriving (Show, Eq)
 
-mkInstance :: Scenario -> CTMDP State Action Double
+mkInstance :: Scenario -> CTMDP.CTMDP State Action Double
 mkInstance scenario =
   let
     -- (State i) represents i customers waiting in the queue.
@@ -71,17 +71,19 @@ mkInstance scenario =
         lambda = _arrivalRate scenario
         a = _serviceRates scenario !! ac
   in
-    mkCTMDP states actions trans rates fixedCost rateCost actionSet 1.0
+    CTMDP.mkCTMDP states actions trans rates fixedCost rateCost actionSet 1.0
 
+scenario1 :: Scenario
 scenario1 = Scenario
             { _arrivalRate  = 3
             , _serviceRates = [2, 4, 8]
             , _serviceCosts = [9, 13, 21]
-            , _holdingCosts = \i -> fromIntegral i--const 5
+            , _holdingCosts = \i -> fromIntegral i
             , _maxWaiting   = 48
             , _scenarioCost = 8.475
             }
 
+scenario2 :: Scenario
 scenario2 = Scenario
             { _arrivalRate  = 2.0
             , _serviceRates = [1, 4, 7]
@@ -90,7 +92,8 @@ scenario2 = Scenario
             , _maxWaiting   = 84
             , _scenarioCost = 21.091
             }
-
+            
+scenario3 :: Scenario
 scenario3 = Scenario
             { _arrivalRate  = 2.0
             , _serviceRates = [1, 4, 7]
@@ -100,6 +103,7 @@ scenario3 = Scenario
             , _scenarioCost = 21.091
             }
 
+scenario4 :: Scenario
 scenario4 = Scenario
             { _arrivalRate  = 2.0
             , _serviceRates = [1, 4, 7]
@@ -109,6 +113,7 @@ scenario4 = Scenario
             , _scenarioCost = 21.971
             }
 
+scenario5 :: Scenario
 scenario5 = Scenario
             { _arrivalRate  = 2.0
             , _serviceRates = [5.0, 5.5, 5.8]
@@ -118,6 +123,7 @@ scenario5 = Scenario
             , _scenarioCost = 17.043
             }
 
+scenario6 :: Scenario
 scenario6 = Scenario
             { _arrivalRate  = 5.0
             , _serviceRates = [5.1, 5.3, 6.0]
@@ -127,6 +133,7 @@ scenario6 = Scenario
             , _scenarioCost = 15.193
             }
 
+scenario7 :: Scenario
 scenario7 = Scenario
             { _arrivalRate  = 10.0
             , _serviceRates = [10.2, 10.6, 12]
@@ -136,6 +143,7 @@ scenario7 = Scenario
             , _scenarioCost = 15.193
             }
 
+scenario8 :: Scenario
 scenario8 = Scenario
             { _arrivalRate  = 20.0
             , _serviceRates = [24, 27, 30]

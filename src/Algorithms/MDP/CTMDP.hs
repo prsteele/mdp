@@ -1,15 +1,51 @@
 -- | A continuous-time Markov decision chain is a Markov decision
 -- process (CTMDP) where an exponential amount of time is spent at
 -- each state.
+--
+-- To avoid collisions with the definitions in Algorithms.MDP.MDP,
+-- this module should be imported qualified.
 module Algorithms.MDP.CTMDP where
 
 import qualified Data.Vector as V
 
-import           Algorithms.MDP.MDP (MDP(MDP))
-import           Algorithms.MDP.MDP hiding (MDP (..))
+import           Algorithms.MDP (MDP(MDP))
+import           Algorithms.MDP hiding (MDP (..))
 
+-- | A Continuous-time Markov decision process.
+--
+-- A CTMDP is a continuous-time analog of an MDP. In an MDP there is
+-- no notion of time, only stages; in a CTMDP each stage takes a
+-- variable amount of time. Each stage lasts an expontially
+-- distributed amount of time characterized by a state- and
+-- action-dependent rate parameter. Instead of simply having costs
+-- associated with a state and an action, the costs of a CTMDP are
+-- broken up into fixed and rate costs. Fixed costs are incured as an
+-- action are chosen, while rate costs are paid for the duration of
+-- the stage.
+--
+-- Here the type variable 'a' represents the type of the states, 'b'
+-- represents the type of the actions, and 't' represents the numeric
+-- type used in computations. Generally choosing 't' to be a Double is
+-- fine, although there is no reason a higher-precision type cannot be
+-- used.
+--
+-- This type should not be constructed directly; use the 'mkCTMDP'
+-- constructor instead.
+data CTMDP a b t = CTMDP
+                   { _states     :: V.Vector a
+                   , _actions    :: V.Vector b
+                   , _fixedCosts :: V.Vector (V.Vector t)
+                   , _rateCosts  :: V.Vector (V.Vector t)
+                   , _rates      :: V.Vector (V.Vector t)
+                   , _trans      :: V.Vector (V.Vector (V.Vector t))
+                   , _discount   :: t
+                   , _actionSet  :: V.Vector (V.Vector Int)
+                   }
+
+-- | A function mapping an action and a state to a transition rate.
 type Rates a b t = b -> a -> t
 
+-- | Create a CTMDP.
 mkCTMDP :: (Eq b) =>
            [a]                -- ^ The state space
         -> [b]                -- ^ The action space
@@ -56,17 +92,7 @@ mkCTMDP states actions trans rates fixedCost rateCost actionSet discount =
     , _actionSet  = _actionSet
     }
 
-data CTMDP a b t = CTMDP
-                   { _states     :: V.Vector a
-                   , _actions    :: V.Vector b
-                   , _fixedCosts :: V.Vector (V.Vector t)
-                   , _rateCosts  :: V.Vector (V.Vector t)
-                   , _rates      :: V.Vector (V.Vector t)
-                   , _trans      :: V.Vector (V.Vector (V.Vector t))
-                   , _discount   :: t
-                   , _actionSet  :: V.Vector (V.Vector Int)
-                   }
-
+-- | Convert a CTMDP into an MDP.
 uniformize :: (Ord t, Fractional t) => CTMDP a b t -> MDP a b t
 uniformize ctmdc =
   let

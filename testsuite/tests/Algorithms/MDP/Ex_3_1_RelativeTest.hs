@@ -10,7 +10,7 @@ import Test.Framework
 
 import Algorithms.MDP.Ex_3_1_Test (correctValuesA, correctValuesB, almostEqual)
 import Algorithms.MDP.Examples.Ex_3_1
-import Algorithms.MDP.MDP
+import Algorithms.MDP
 import Algorithms.MDP.ValueIteration
 
 lowerValuesA :: [Double]

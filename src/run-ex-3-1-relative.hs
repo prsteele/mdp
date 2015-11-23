@@ -1,5 +1,5 @@
 import Algorithms.MDP.Examples.Ex_3_1
-import Algorithms.MDP.MDP
+import Algorithms.MDP
 import Algorithms.MDP.ValueIteration
 
 import qualified Data.Vector as V

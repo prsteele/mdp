@@ -1,6 +1,6 @@
 module Algorithms.MDP.Examples.Ex_3_1 where
 
-import Algorithms.MDP.MDP
+import Algorithms.MDP
 
 data State = A | B
            deriving (Show, Ord, Eq)

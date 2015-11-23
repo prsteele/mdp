@@ -1,10 +1,37 @@
-{-# LANGUAGE GADTs, StandaloneDeriving #-}
-
--- | The main module for modeling Markov decision processes (MDP).
+-- |
+-- Module     : Algorithms.MDP
+-- Copyright  : Patrick Steele 2015
+-- License    : MIT (see the LICENSE file)
+-- Maintainer : prs233@cornell.edu
 --
--- We are primarily concerned with infinite horizon MDPs, both
--- discounted and undiscounted.
-module Algorithms.MDP.MDP where
+-- Algorithms and data structures for expressing and solving Markov
+-- decision processes (MDPs).
+--
+-- See the following for references on the algorithms implemented,
+-- along with general terminology.
+--
+-- * \"Dynamic Programmand and Optimal Control, Vol. II\", by Dimitri
+--   P. Bertsekas, Athena Scientific, Belmont, Massachusetts.
+--
+-- * \"Stochastic Dynamic Programming and the Control of Queueing
+--   Systems\", by Linn I. Sennott, A Wiley- Interscience Publication,
+--   New York.
+module Algorithms.MDP
+       ( MDP (..)
+       , MDPError (..)
+       , verifyStochastic
+       , Transitions
+       , Costs
+       , ActionSet
+       , CF
+       , CFBounds (..)
+       , cost
+       , action
+       , optimalityGap
+       , DifferentialCF
+       , mkDiscountedMDP
+       , mkUndiscountedMDP
+       ) where
 
 import qualified Data.Vector as V
 import Data.Maybe
@@ -78,6 +105,15 @@ data DifferentialCF a b t = DifferentialCF
 -- probabilities. The goal is to compute a policy -- a mapping from
 -- states to actions -- which minimizes the total discounted cost of
 -- the problem, assuming a given discount factor in the range (0, 1].
+--
+-- Here the type variable 'a' represents the type of the states, 'b'
+-- represents the type of the actions, and 't' represents the numeric
+-- type used in computations. Generally choosing 't' to be a Double is
+-- fine, although there is no reason a higher-precision type cannot be
+-- used.
+--
+-- This type should not be constructed directly; use the
+-- 'mkDiscountedMDP' or 'mkUndiscountedMDP' constructors instead.
 data MDP a b t = MDP
                  { _states    :: V.Vector a
                  , _actions   :: V.Vector b
@@ -87,6 +123,7 @@ data MDP a b t = MDP
                  , _actionSet :: V.Vector (V.Vector Int)
                  }
 
+-- | Creates a discounted MDP.
 mkDiscountedMDP :: (Eq b) =>
              [a]                -- ^ The state space
           -> [b]                -- ^ The action space
@@ -122,6 +159,7 @@ mkDiscountedMDP states actions trans costs actionSet discount =
     , _actionSet = _actionSet
     }
 
+-- | Creates an undiscounted MDP.
 mkUndiscountedMDP :: (Eq b, Num t) =>
                      [a]                -- ^ The state space
                   -> [b]                -- ^ The action space
@@ -132,6 +170,11 @@ mkUndiscountedMDP :: (Eq b, Num t) =>
 mkUndiscountedMDP states actions trans costs actionSet =
   mkDiscountedMDP states actions trans costs actionSet 1
 
+-- | An error describing the ways an MDP can be poorly-defined.
+--
+-- An MDP can be poorly defined by having negative transition
+-- probabilities, or having the total probability associated with a
+-- state and action exceeding one.
 data MDPError a b t = MDPError
                       { _negativeProbability :: [(b, a, a, t)]
                       , _notOneProbability   :: [(b, a, t)]

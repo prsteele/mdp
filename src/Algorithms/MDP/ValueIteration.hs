@@ -1,4 +1,13 @@
-module Algorithms.MDP.ValueIteration where
+module Algorithms.MDP.ValueIteration
+       ( -- * Value iteration algorithms
+         valueIteration
+       , relativeValueIteration
+       , undiscountedRelativeValueIteration
+         -- * Helper functions for value iteration
+       , valueIterate
+       , relativeValueIterate
+       , undiscountedRVI
+       ) where
 
 import qualified Data.Vector as V
 
@@ -13,10 +22,10 @@ inner u v = V.sum (V.zipWith (*) u v)
 --
 -- This method should only be used on discounted MDPs (e.g. an MDP
 -- with a discount factor less than one).
-valueIteration :: (Ord t, Num t) => 
-                  MDP a b t   -- ^ The DiscountedMDP to solve
-               -> [CF a b t]  -- ^ An converging sequence of
-                              -- cost functions
+valueIteration ::
+  (Ord t, Num t) => 
+  MDP a b t      -- ^ The MDP to solve
+  -> [CF a b t]  -- ^ An converging sequence of cost functions
 valueIteration mdp =
   let
     states = _states mdp
@@ -28,7 +37,7 @@ valueIteration mdp =
 
 -- | Computes the next estimate of the cost function.
 valueIterate :: (Ord t, Num t) => 
-                MDP a b t -- ^ The DiscountedMDP we are solving
+                MDP a b t -- ^ The MDP to solve
              -> CF a b t  -- ^ The current cost function estimate
              -> CF a b t  -- ^ The next cost function estimate
 valueIterate mdp cf = V.imap (choiceFor mdp cf) (_states mdp)
@@ -76,9 +85,10 @@ costForAction mdp cf sIndex ac =
 -- state. That is, given a cost estimate 'c' for a given state and
 -- lower and upper bounds 'lb' and 'ub', the true cost is guaranteed
 -- to be in the interval [c + lb, c + ub].
-relativeValueIteration :: (Read t, Ord t, Fractional t) => 
-                          MDP a b t 
-                       -> [CFBounds a b t]
+relativeValueIteration ::
+  (Read t, Ord t, Fractional t) => 
+  MDP a b t           -- ^ The MDP to solve
+  -> [CFBounds a b t] -- ^ A converging sequence of cost functions.
 relativeValueIteration mdp =
   let
     states = _states mdp
@@ -92,10 +102,11 @@ relativeValueIteration mdp =
 
 -- | Computes the next estimate of the cost function and associated
 -- error bounds.
-relativeValueIterate :: (Ord t, Fractional t) => 
-                        MDP a b t 
-                        -> CFBounds a b t 
-                        -> CFBounds a b t
+relativeValueIterate ::
+  (Ord t, Fractional t) => 
+  MDP a b t 
+  -> CFBounds a b t 
+  -> CFBounds a b t
 relativeValueIterate mdp (CFBounds cf _ _) =
   let
     alpha = _discount mdp
@@ -112,9 +123,10 @@ relativeValueIterate mdp (CFBounds cf _ _) =
     }
 
 -- | Relative value iteration for undiscounted MDPs.
-undiscountedRelativeValueIteration :: (Ord t, Fractional t, Read t) =>
-                                      MDP a b t 
-                                   -> [CFBounds a b t]
+undiscountedRelativeValueIteration ::
+  (Ord t, Fractional t, Read t) =>
+  MDP a b t           -- ^ The MDP to solve
+  -> [CFBounds a b t] -- ^ A converging sequence of cost functions
 undiscountedRelativeValueIteration mdp =
   let
     states = _states mdp

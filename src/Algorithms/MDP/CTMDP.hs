@@ -1,10 +1,17 @@
--- | A continuous-time Markov decision chain is a Markov decision
--- process (CTMDP) where an exponential amount of time is spent at
--- each state.
+-- | A continuous-time Markov decision process (CTMDP) is an MDP where
+-- transitions between states take a random amount of time. Each
+-- transition time is assumed to be exponentially distributed with an
+-- action- and state-dependent transition rate.
 --
--- To avoid collisions with the definitions in Algorithms.MDP.MDP,
--- this module should be imported qualified.
-module Algorithms.MDP.CTMDP where
+-- The record accessors of the 'CTMDP' type conflict with those of the
+-- 'MDP' type, so either import only the 'mkCTMDP' and 'uniformize'
+-- functions or import this module qualified.
+module Algorithms.MDP.CTMDP
+       ( CTMDP (..)
+       , mkCTMDP
+       , Rates
+       , uniformize
+       ) where
 
 import qualified Data.Vector as V
 
@@ -13,11 +20,10 @@ import           Algorithms.MDP hiding (MDP (..))
 
 -- | A Continuous-time Markov decision process.
 --
--- A CTMDP is a continuous-time analog of an MDP. In an MDP there is
--- no notion of time, only stages; in a CTMDP each stage takes a
--- variable amount of time. Each stage lasts an expontially
--- distributed amount of time characterized by a state- and
--- action-dependent rate parameter. Instead of simply having costs
+-- A CTMDP is a continuous-time analog of an MDP. In a CTMDP each
+-- stage takes a variable amount of time. Each stage lasts an
+-- expontially distributed amount of time characterized by a state-
+-- and action-dependent rate parameter. Instead of simply having costs
 -- associated with a state and an action, the costs of a CTMDP are
 -- broken up into fixed and rate costs. Fixed costs are incured as an
 -- action are chosen, while rate costs are paid for the duration of
@@ -54,7 +60,7 @@ mkCTMDP :: (Eq b) =>
         -> Costs a b t        -- ^ The action-dependent fixed costs
         -> Costs a b t        -- ^ The action-dependent rate costs
         -> ActionSet a b      -- ^ The state-dependent actions
-        -> t                  -- ^ The discount factor
+        -> t                  -- ^ The discount factor in (0, 1]
         -> CTMDP a b t        -- ^ The resulting CTMDP
 mkCTMDP states actions trans rates fixedCost rateCost actionSet discount =
   let

@@ -17,20 +17,23 @@
 --   Systems\", by Linn I. Sennott, A Wiley- Interscience Publication,
 --   New York.
 module Algorithms.MDP
-       ( MDP (..)
-       , MDPError (..)
-       , verifyStochastic
+       ( -- * Markov decision processes
+         MDP (..)
+       , mkDiscountedMDP
+       , mkUndiscountedMDP
+         -- * Types
        , Transitions
        , Costs
        , ActionSet
        , CF
        , CFBounds (..)
+         -- * Utility functions
        , cost
        , action
        , optimalityGap
-       , DifferentialCF
-       , mkDiscountedMDP
-       , mkUndiscountedMDP
+         -- * Validation
+       , verifyStochastic
+       , MDPError (..)
        ) where
 
 import qualified Data.Vector as V
@@ -88,15 +91,6 @@ data CFBounds a b t = CFBounds
 -- This error is absolute, not relative.
 optimalityGap :: (Num t) => CFBounds a b t -> t
 optimalityGap (CFBounds _ lb ub) = ub - lb
-
--- | A DifferentialCF is an estimate of the long-run optimal average
--- cost per stage along with a differential cost vector describing the
--- deviation of each cost of a given state from the long-run average
--- cost.
-data DifferentialCF a b t = DifferentialCF
-                            { _cost :: t
-                            , _h    :: CF a b t
-                            }
 
 -- | A Markov decision process.
 --

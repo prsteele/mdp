@@ -133,5 +133,5 @@ estimates = map (estimate A) (take 10 iterations)
 -}
   ) where
 
-import Algorithms.MDP.ValueIteration
-import Algorithms.MDP.CTMDP
+import Algorithms.MDP.ValueIteration()
+import Algorithms.MDP.CTMDP()

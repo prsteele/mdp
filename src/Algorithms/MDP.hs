@@ -19,6 +19,10 @@
 --
 -- The module "Algorithms.MDP.Examples" contains implementations of
 -- several example problems from these texts.
+--
+-- To actually solve an MDP, use (for example) the
+-- 'Algorithms.MDP.ValueIteration.valueIteration' function from the
+-- "Algorithms.MDP.ValueIteration" module.
 module Algorithms.MDP
        ( -- * Markov decision processes
          MDP (..)

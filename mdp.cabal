@@ -20,6 +20,13 @@ category:            Algorithms, Math
 build-type:          Simple
 cabal-version:       >=1.8
 
+-- We have to help cabal sdist find imported test files
+extra-source-files:
+  testsuite/tests/Algorithms/MDP/Ex_3_1_Test.hs
+  testsuite/tests/Algorithms/MDP/Ex_3_1_RelativeTest.hs
+  testsuite/tests/Algorithms/MDP/Ex_3_2_Test.hs
+  testsuite/tests/Algorithms/MDP/Ex_MM1_Test.hs
+
 Library
   Build-Depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*
   Exposed-modules:     Algorithms.MDP, Algorithms.MDP.ValueIteration,

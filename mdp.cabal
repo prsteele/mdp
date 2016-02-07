@@ -15,7 +15,7 @@ license:             MIT
 license-file:        LICENSE
 author:              Patrick Steele
 maintainer:          prs233@cornell.edu
- copyright:          Copyright (c) 2015 Patrick Steele
+ copyright:          Copyright (c) 2015-2016 Patrick Steele
 category:            Algorithms, Math
 build-type:          Simple
 cabal-version:       >=1.8
@@ -28,33 +28,45 @@ extra-source-files:
   testsuite/tests/Algorithms/MDP/Ex_MM1_Test.hs
 
 Library
-  Build-Depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*
-  Exposed-modules:     Algorithms.MDP, Algorithms.MDP.ValueIteration,
-                       Algorithms.MDP.CTMDP, Algorithms.MDP.Examples.Ex_3_1,
-                       Algorithms.MDP.Examples.Ex_3_2, Algorithms.MDP.Examples.MM1,
-                       Algorithms.MDP.Examples
+  Build-Depends:       base ==4.8.*
+                     , containers
+                     , vector ==0.11.*
+  Exposed-modules:     Algorithms.MDP
+                     , Algorithms.MDP.ValueIteration,
+                       Algorithms.MDP.CTMDP
+                     , Algorithms.MDP.Examples.Ex_3_1
+                     , Algorithms.MDP.Examples.Ex_3_2
+                     , Algorithms.MDP.Examples.MM1
+                     , Algorithms.MDP.Examples
   ghc-options:         -Wall -fforce-recomp
   hs-source-dirs:      src
 
 executable ex-3-1
   main-is:             run-ex-3-1.hs
-  build-depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*
+  build-depends:       base ==4.8.*
+                     , containers
+                     , vector ==0.11.*
   hs-source-dirs:      src
 
 executable ex-3-1-relative
   main-is:             run-ex-3-1-relative.hs
-  build-depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*,
-                       transformers ==0.4.2.*
+  build-depends:       base ==4.8.*
+                     , containers
+                     , vector ==0.11.*
   hs-source-dirs:      src
 
 executable ex-3-2
   main-is:             run-ex-3-2.hs
-  build-depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*
+  build-depends:       base ==4.8.*
+                     , containers
+                     , vector ==0.11.*
   hs-source-dirs:      src
 
 executable mm1
   main-is:             run-mm1.hs
-  build-depends:       base ==4.8.*, array, containers, parallel, vector ==0.11.*
+  build-depends:       base ==4.8.*
+                     , containers
+                     , vector ==0.11.*
   hs-source-dirs:      src
   ghc-options:         -Wall
   
@@ -62,8 +74,12 @@ test-suite TestMain
   hs-source-dirs:     testsuite/tests/, src/
   main-is:            TestMain.hs
   type:               exitcode-stdio-1.0
-  build-depends:      base >= 4 && < 5, HTF == 0.13.*, QuickCheck >=2.8.1,
-                      containers, HUnit, vector ==0.11.*
+  build-depends:      base >= 4 && < 5
+                    , HTF == 0.13.*
+                    , QuickCheck >=2.8.1
+                    , containers
+                    , HUnit
+                    , vector ==0.11.*
 
 source-repository head
   type:     git
